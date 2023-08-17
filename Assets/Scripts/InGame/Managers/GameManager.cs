@@ -6,7 +6,9 @@ using UnityEngine.Events;
 public class GameManager : MonoBehaviour
 {
 	#region PublicVariables
+
 	public static GameManager instance;
+
 	public UnityEvent onGameTutorial;
 	public UnityEvent onGameStart;
 	public UnityEvent onGameEnd;
@@ -14,6 +16,7 @@ public class GameManager : MonoBehaviour
     public UnityEvent offMainScreen;
 	public UnityEvent onVictoryScreen;
     public UnityEvent offVictoryScreen;
+
     #endregion
 
     #region PrivateVariables

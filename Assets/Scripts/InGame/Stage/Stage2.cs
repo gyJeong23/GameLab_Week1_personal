@@ -26,14 +26,8 @@ public class Stage2 : BaseStage
 
     void MakePlatform()
     {
-        GameObject prefab = Resources.Load<GameObject>("Prefabs/Stage2");
+        GameObject prefab = Resources.Load<GameObject>("Prefabs/Stages/Stage2");
         GameObject go = Instantiate(prefab);
-
-        //for (int i = 0; i < go.transform.childCount; i++)
-        //{
-        //    transform.GetChild(i).gameObject.SetActive(true);
-        //}
-
         go.transform.SetParent(Platforms.transform);
     }
 
