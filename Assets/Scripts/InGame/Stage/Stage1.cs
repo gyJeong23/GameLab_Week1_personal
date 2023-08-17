@@ -59,7 +59,7 @@ public class Stage1 : BaseStage
 
         if (_direct == Direct.Center)
         {
-            GameObject prefab = Resources.Load<GameObject>("Prefabs/DefaultPlatform");
+            GameObject prefab = Resources.Load<GameObject>("Prefabs/Platforms/DefaultPlatform");
             GameObject go = Instantiate(prefab);
 
             go.GetComponent<Transform>().localScale = new Vector3(m_startPoint.x * 2, m_platformSize.y, m_platformSize.z);
@@ -71,7 +71,7 @@ public class Stage1 : BaseStage
         for (int i = 0; i < m_size; i++)
         {
 
-            GameObject prefab = Resources.Load<GameObject>("Prefabs/DropPlatform");
+            GameObject prefab = Resources.Load<GameObject>("Prefabs/Platforms/DropPlatform");
             GameObject go = Instantiate(prefab);
 
             go.GetComponent<Platform>().m_delay = _time;
