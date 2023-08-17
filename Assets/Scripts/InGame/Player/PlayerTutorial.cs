@@ -1,21 +1,21 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
+//using System.Collections;
+//using System.Collections.Generic;
+//using UnityEngine;
+//using UnityEngine.UI;
 
-public class PlayerTutorial : MonoBehaviour
-{
-    #region PublicVariables
-    #endregion
+//public class PlayerTutorial : MonoBehaviour
+//{
+//    #region PublicVariables
+//    #endregion
 
-    #region PrivateVariables
+//    #region PrivateVariables
     
-    [SerializeField] private Dictionary<string, TutorialButton> m_keyInputCheck = new Dictionary<string, TutorialButton>();
-    #endregion
+//    [SerializeField] private Dictionary<string, TutorialButton> m_keyInputCheck = new Dictionary<string, TutorialButton>();
+//    #endregion
 
-    #region PublicMethod
-    #endregion
+//    #region PublicMethod
+//    #endregion
 
-    #region PrivateMethod
-    #endregion
-}
+//    #region PrivateMethod
+//    #endregion
+//}
