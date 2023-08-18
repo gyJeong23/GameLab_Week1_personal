@@ -17,14 +17,19 @@ public class Define
 
     public enum TagName
     {
+        Default,
+        Player,
         Ground,
         DropItem,
     }
 
     public enum ItemType
     { 
+        Default,
         Weapon,
-        Skill
+        Desh,
+        StrongAttack,
+        Counter,
     }
 
     #endregion

@@ -6,10 +6,10 @@ public class DropItem : MonoBehaviour
 {
     #region PublicVariables
 
-    Collider2D m_collider2D;
+    CircleCollider2D m_collider2D;
     Rigidbody2D m_rigidbody2D;
 
-    public Define.ItemType m_itemType = Define.ItemType.Weapon;
+    public Define.ItemType m_itemType;
 
     #endregion
 
@@ -23,16 +23,16 @@ public class DropItem : MonoBehaviour
 
     private void Start()
     {
-        m_collider2D = GetComponent<Collider2D>();
+        m_collider2D = GetComponent<CircleCollider2D>();
         m_rigidbody2D = GetComponent<Rigidbody2D>();
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag(nameof(Define.TagName.Ground)))
         {
             m_collider2D.isTrigger = true;
-            m_rigidbody2D.isKinematic = true;
+            m_rigidbody2D.bodyType = RigidbodyType2D.Kinematic;
         }
     }
 

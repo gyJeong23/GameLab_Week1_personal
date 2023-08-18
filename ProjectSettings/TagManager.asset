@@ -10,6 +10,7 @@ TagManager:
   - Normal
   - DeadLine
   - DropItem
+  - Monster
   layers:
   - Default
   - TransparentFX

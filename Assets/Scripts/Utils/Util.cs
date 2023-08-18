@@ -1,14 +1,10 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class InputManager
+public class Util
 {
     #region PublicVariables
-
-    public Action KeyAction = null;
-
     #endregion
 
     #region PrivateVariables
@@ -16,13 +12,14 @@ public class InputManager
 
     #region PublicMethod
 
-    public void OnUpdate()
+    public static Transform SearchChild(Transform[] _childs, string _name)
     {
-        if (Input.anyKey == false)
-            return;
-
-        if (KeyAction != null)
-            KeyAction.Invoke();
+        foreach (Transform child in _childs)
+        {
+            if (child.gameObject.name == _name)
+                return child;
+        }
+        return null;
     }
 
     #endregion
