@@ -8,11 +8,12 @@ public class MonsterController : BaseController
     #endregion
 
     #region ProtectedVariables
-    [SerializeField] protected override float MoveSpeed { get; set; }
+    protected override float MoveSpeed { get; set; }
 
-    [SerializeField] protected override bool IsGround { get; set; }
-    [SerializeField] protected override bool IsAttackCoolTime { get; set; }
-    [SerializeField] protected override bool IsDeshCoolTime { get; set; }
+    protected override bool IsGround { get; set; }
+    protected override bool IsMove { get; set; }
+    protected override bool IsAttackCoolTime { get; set; }
+    protected override bool IsDeshCoolTime { get; set; }
 
     #endregion
 

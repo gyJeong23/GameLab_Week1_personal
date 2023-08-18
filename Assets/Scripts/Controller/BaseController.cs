@@ -18,6 +18,7 @@ public abstract class BaseController : MonoBehaviour
     protected abstract float MoveSpeed { get; set; }
 
     protected abstract bool IsGround { get; set; }
+    protected abstract bool IsMove { get; set; }
     protected abstract bool IsAttackCoolTime { get; set; }
     protected abstract bool IsDeshCoolTime { get; set; }
 

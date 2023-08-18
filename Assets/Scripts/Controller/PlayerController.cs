@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SocialPlatforms;
 
  public class PlayerController : BaseController
 {
@@ -9,30 +11,34 @@ using UnityEngine;
 
     #region ProtectedVariables
 
-    [SerializeField] protected override float MoveSpeed { get; set; }
+    protected override float MoveSpeed { get; set; }
 
-    [SerializeField] protected override bool IsGround { get; set; }
-    [SerializeField] protected override bool IsAttackCoolTime { get; set; }
-    [SerializeField] protected override bool IsDeshCoolTime { get; set; }
+    protected override bool IsGround { get; set; }
+    protected override bool IsMove { get; set; }
+    protected override bool IsAttackCoolTime { get; set; }
+    protected override bool IsDeshCoolTime { get; set; }
 
     #endregion
 
     #region PrivateVariables
 
-    Define.PlayerState m_playerState;
+    [SerializeField] Define.PlayerActionState m_playerActionState;
+    [SerializeField] Define.PlayerMoveState m_playerMoveState;
 
-    [SerializeField] float m_deshRange;
+    [SerializeField] float m_deshPower;
     [SerializeField] float m_jumpPower;
 
     float m_coolTimeWeakAttack = 0.3f;
     float m_coolTimeStrongAttack = 1f;
     float m_coolTimeCounter = 1f;
-    float m_coolTimeDesh = 1f;
+    [SerializeField] float m_coolTimeDesh = 1f;
     
     bool m_hasWeapon;
     bool m_hasDesh;
     bool m_hasStorngAttack;
     bool m_hasCounter;
+
+    Vector3 m_moveDir;
 
     #endregion
 
@@ -47,16 +53,46 @@ using UnityEngine;
         Managers.Input.KeyAction += OnKeyboard;
 
         Util.SearchChild(m_childs, "sword").gameObject.SetActive(false);
+
+        m_moveDir = Vector3.right;
     }
 
     protected override void OnUpdate()
     {
+        switch (m_playerMoveState)
+        {
+            case Define.PlayerMoveState.Idle :
+                {
+                }
+                break;
+            case Define.PlayerMoveState.Move : 
+                {
+                    if (Input.GetKeyUp(KeyCode.A) || Input.GetKeyUp(KeyCode.D))
+                    {
+                        IsMove = false;
+                        MoveState = Define.PlayerMoveState.Idle;
+                    }    
+                    
+                    Move(m_moveDir);
+                }
+                break;
+            case Define.PlayerMoveState.Desh : 
+                {
+                    Desh(m_moveDir);
+                }
+                break;
+        }
+
     }
 
     protected override void Move(Vector3 _moveDir)
     {
-        transform.position += _moveDir * MoveSpeed * Time.deltaTime;
+        if (m_playerMoveState != Define.PlayerMoveState.Move)
+            return;
+
+        transform.position += _moveDir * MoveSpeed * Time.deltaTime; 
         transform.localScale = new Vector3(_moveDir.x, 1, 1);
+
     }
 
     protected override void DefaultAttack()
@@ -66,32 +102,70 @@ using UnityEngine;
     #endregion 
 
     #region PrivateMethod
-
-    private Define.PlayerState State
+   
+    private Define.PlayerMoveState MoveState
     {
-        get { return m_playerState; }
+        get { return m_playerMoveState; }
         set
         {
-            m_playerState = value;
+            m_playerMoveState = value;
 
-            switch (m_playerState)
+            switch (m_playerMoveState)
             {
-                case Define.PlayerState.Idle:
-                    m_animator.CrossFade("idle", 0.1f);
+                case Define.PlayerMoveState.Idle:
+                    { 
+                        
+                    }
                     break;
-                case Define.PlayerState.WeakAttack:
-                    m_animator.CrossFade("WeakAttack", 0.1f, -1, 0);
+                case Define.PlayerMoveState.Move:
+                    { 
+                        IsMove = true;
+                    }
                     break;
-                case Define.PlayerState.StrongAttack:
-                    m_animator.CrossFade("StrongAttack", 0.1f, -1, 0);
-                    break;
-                case Define.PlayerState.Counter:
-                    m_animator.CrossFade("Counter", 0.1f, -1, 0);
+                case Define.PlayerMoveState.Desh:
+                    {
+                        StartCoroutine(nameof(WaitDeshCoolTime), m_coolTimeDesh);
+                    }
                     break;
             }
         }
     }
 
+    private Define.PlayerActionState ActionState
+    {
+        get { return m_playerActionState; }
+        set
+        {
+            m_playerActionState = value;
+
+            switch (m_playerActionState)
+            {
+                case Define.PlayerActionState.Idle:
+                    {
+                        m_animator.CrossFade("idle", 0.1f);
+                    }
+                    break;
+                case Define.PlayerActionState.WeakAttack:
+                    {
+                        m_animator.CrossFade("WeakAttack", 0.1f, -1, 0);
+                        StartCoroutine(nameof(WaitAttackCoolTime), m_coolTimeWeakAttack);
+                    }
+                    break;
+                case Define.PlayerActionState.StrongAttack:
+                    {
+                        m_animator.CrossFade("StrongAttack", 0.1f, -1, 0);
+                        StartCoroutine(nameof(WaitAttackCoolTime), m_coolTimeStrongAttack);
+                    }
+                    break;
+                case Define.PlayerActionState.Counter:
+                    {
+                        m_animator.CrossFade("Counter", 0.1f, -1, 0);
+                        StartCoroutine(nameof(WaitAttackCoolTime), m_coolTimeCounter);
+                    }
+                    break;
+            }
+        }
+    }
 
     void OnKeyboard()
     {
@@ -104,56 +178,45 @@ using UnityEngine;
 
         if (Input.GetKey(KeyCode.A))
         {
-            Move(Vector3.left);
+            MoveState = Define.PlayerMoveState.Move;
 
-            if (Input.GetKeyDown(KeyCode.LeftShift) && IsDeshCoolTime == false && m_hasDesh)
-            {
-                State = Define.PlayerState.Desh;
-                IsDeshCoolTime = true;
-                Desh(Vector3.left);
-                Invoke("WaitmDeshCoolTime", m_coolTimeDesh);
-            }
+            m_moveDir = Vector3.left;
         }
         if (Input.GetKey(KeyCode.D))
         {
-            Move(Vector3.right);
+            MoveState = Define.PlayerMoveState.Move;
 
-            if (Input.GetKeyDown(KeyCode.LeftShift) && IsDeshCoolTime == false && m_hasDesh)
-            {
-                State = Define.PlayerState.Desh;
-                IsDeshCoolTime = true;
-                Desh(Vector3.right);
-                Invoke("WaitmDeshCoolTime", m_coolTimeDesh);
-            }
+            m_moveDir = Vector3.right;
         }
         if (Input.GetKeyDown(KeyCode.W))
         {
             Jump();
         }
+        if (Input.GetKeyDown(KeyCode.LeftShift) && m_hasDesh)
+        {
+            MoveState = Define.PlayerMoveState.Desh;
+        }
+        //if (Input.GetKeyUp(KeyCode.A) || Input.GetKeyUp(KeyCode.D))
+        //{
+        //   
+        //}
 
         #endregion
-
         #region Player Action
 
         if (IsAttackCoolTime == false && m_hasWeapon == true)
         {
             if (Input.GetKeyDown(KeyCode.J))
             {
-                State = Define.PlayerState.WeakAttack;
-                IsAttackCoolTime = true;
-                Invoke("WaitAttackCoolTime", m_coolTimeWeakAttack);
+                ActionState = Define.PlayerActionState.WeakAttack;
             }
             if (Input.GetKeyDown(KeyCode.K) && IsAttackCoolTime == false && m_hasStorngAttack)
             {
-                State = Define.PlayerState.StrongAttack;
-                IsAttackCoolTime = true;
-                Invoke("WaitAttackCoolTime", m_coolTimeStrongAttack);
+                ActionState = Define.PlayerActionState.StrongAttack;
             }
             if (Input.GetKeyDown(KeyCode.L) && IsAttackCoolTime == false && m_hasCounter)
             {
-                State = Define.PlayerState.Counter;
-                IsAttackCoolTime = true;
-                Invoke("WaitAttackCoolTime", m_coolTimeCounter);
+                ActionState = Define.PlayerActionState.Counter;
             }
         }
 
@@ -162,14 +225,21 @@ using UnityEngine;
 
     #region Cool Time Define
 
-    void WaitAttackCoolTime()
+    IEnumerator WaitAttackCoolTime(float _coolTime)
     {
-        IsAttackCoolTime = false;
-    }
+        IsAttackCoolTime = true;
+        yield return new WaitForSeconds(_coolTime);
 
-    void WaitmDeshCoolTime()
+        IsAttackCoolTime = false;
+        ActionState = Define.PlayerActionState.Idle;
+    }
+    IEnumerator WaitDeshCoolTime(float _coolTime)
     {
+        IsDeshCoolTime = true;
+        yield return new WaitForSeconds(_coolTime);
+
         IsDeshCoolTime = false;
+        MoveState = Define.PlayerMoveState.Idle;
     }
 
     #endregion
@@ -178,17 +248,19 @@ using UnityEngine;
 
     void Jump()
     {
-        if (IsGround)
-        {
-            m_rigidbody.AddForce(Vector3.up * m_jumpPower, ForceMode2D.Impulse);
-            IsGround = false;
-        }
+        if (IsGround == false)
+            return;
+
+        m_rigidbody.AddForce(Vector3.up * m_jumpPower, ForceMode2D.Impulse);
+        IsGround = false;
     }
 
     void Desh(Vector3 _moveDir)
     {
-        m_rigidbody.velocity = Vector3.zero;
-        transform.position += Vector3.right * m_deshRange * _moveDir.x;
+        if (IsDeshCoolTime) return;
+
+        Vector3 destPos = new Vector3(transform.position.x + _moveDir.x * MoveSpeed, transform.position.y, transform.position.z);
+        transform.position = Vector3.Lerp(transform.position ,destPos, 0.7f);
     }
 
     #endregion

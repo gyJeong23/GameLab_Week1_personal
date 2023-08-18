@@ -4,14 +4,17 @@ using UnityEngine;
 
 public class Define
 {
-    #region PublicVariables
-
-    public enum PlayerState
+    public enum PlayerActionState
     {
         Idle,
         WeakAttack,
         StrongAttack,
         Counter,
+    }
+    public enum PlayerMoveState
+    {
+        Idle,
+        Move,
         Desh,
     }
 
@@ -32,14 +35,4 @@ public class Define
         Counter,
     }
 
-    #endregion
-
-    #region PrivateVariables
-    #endregion
-
-    #region PublicMethod
-    #endregion
-
-    #region PrivateMethod
-    #endregion
 }
