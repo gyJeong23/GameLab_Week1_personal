@@ -2,37 +2,68 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+ public class PlayerController : BaseController
 {
     #region PublicVariables
     #endregion
 
+    #region ProtectedVariables
+
+    [SerializeField] protected override float MoveSpeed { get; set; }
+
+    [SerializeField] protected override bool IsGround { get; set; }
+    [SerializeField] protected override bool IsAttackCoolTime { get; set; }
+    [SerializeField] protected override bool IsDeshCoolTime { get; set; }
+
+    #endregion
+
     #region PrivateVariables
 
-    Rigidbody2D m_rigidbody;
-    Animator m_animator;
-    
     Define.PlayerState m_playerState;
 
-    [SerializeField] float m_playerSpeed;
     [SerializeField] float m_deshRange;
     [SerializeField] float m_jumpPower;
-    
+
     float m_coolTimeWeakAttack = 0.3f;
     float m_coolTimeStrongAttack = 1f;
     float m_coolTimeCounter = 1f;
     float m_coolTimeDesh = 1f;
-
-    bool m_isGround;
-    bool m_isAttackCoolTime;
-    bool m_isDeshCoolTime;
+    
+    bool m_hasWeapon;
+    bool m_hasDesh;
+    bool m_hasStorngAttack;
+    bool m_hasCounter;
 
     #endregion
 
     #region PublicMethod
-
-
     #endregion
+
+    #region ProtectedMethod
+
+    protected override void Init()
+    {
+        Managers.Input.KeyAction -= OnKeyboard;
+        Managers.Input.KeyAction += OnKeyboard;
+
+        Util.SearchChild(m_childs, "sword").gameObject.SetActive(false);
+    }
+
+    protected override void OnUpdate()
+    {
+    }
+
+    protected override void Move(Vector3 _moveDir)
+    {
+        transform.position += _moveDir * MoveSpeed * Time.deltaTime;
+        transform.localScale = new Vector3(_moveDir.x, 1, 1);
+    }
+
+    protected override void DefaultAttack()
+    {
+    }
+    
+    #endregion 
 
     #region PrivateMethod
 
@@ -61,14 +92,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void Start()
-    {
-        Managers.Input.KeyAction -= OnKeyboard;
-        Managers.Input.KeyAction += OnKeyboard;
-
-        m_rigidbody = GetComponent<Rigidbody2D>();
-        m_animator = transform.GetComponentInChildren<Animator>();
-    }
 
     void OnKeyboard()
     {
@@ -77,15 +100,16 @@ public class PlayerController : MonoBehaviour
         //    return;
         //}
 
-        //Player Action
+        #region Player Move
+
         if (Input.GetKey(KeyCode.A))
         {
             Move(Vector3.left);
 
-            if (Input.GetKeyDown(KeyCode.LeftShift) && m_isDeshCoolTime == false)
+            if (Input.GetKeyDown(KeyCode.LeftShift) && IsDeshCoolTime == false && m_hasDesh)
             {
                 State = Define.PlayerState.Desh;
-                m_isDeshCoolTime = true;
+                IsDeshCoolTime = true;
                 Desh(Vector3.left);
                 Invoke("WaitmDeshCoolTime", m_coolTimeDesh);
             }
@@ -94,10 +118,10 @@ public class PlayerController : MonoBehaviour
         {
             Move(Vector3.right);
 
-            if (Input.GetKeyDown(KeyCode.LeftShift) && m_isDeshCoolTime == false)
+            if (Input.GetKeyDown(KeyCode.LeftShift) && IsDeshCoolTime == false && m_hasDesh)
             {
                 State = Define.PlayerState.Desh;
-                m_isDeshCoolTime = true;
+                IsDeshCoolTime = true;
                 Desh(Vector3.right);
                 Invoke("WaitmDeshCoolTime", m_coolTimeDesh);
             }
@@ -106,66 +130,59 @@ public class PlayerController : MonoBehaviour
         {
             Jump();
         }
-        if (m_isAttackCoolTime == false)
+
+        #endregion
+
+        #region Player Action
+
+        if (IsAttackCoolTime == false && m_hasWeapon == true)
         {
             if (Input.GetKeyDown(KeyCode.J))
             {
                 State = Define.PlayerState.WeakAttack;
-                m_isAttackCoolTime = true;
+                IsAttackCoolTime = true;
                 Invoke("WaitAttackCoolTime", m_coolTimeWeakAttack);
             }
-            if (Input.GetKeyDown(KeyCode.K) && m_isAttackCoolTime == false)
+            if (Input.GetKeyDown(KeyCode.K) && IsAttackCoolTime == false && m_hasStorngAttack)
             {
                 State = Define.PlayerState.StrongAttack;
-                m_isAttackCoolTime = true;
+                IsAttackCoolTime = true;
                 Invoke("WaitAttackCoolTime", m_coolTimeStrongAttack);
             }
-            if (Input.GetKeyDown(KeyCode.L) && m_isAttackCoolTime == false)
+            if (Input.GetKeyDown(KeyCode.L) && IsAttackCoolTime == false && m_hasCounter)
             {
                 State = Define.PlayerState.Counter;
-                m_isAttackCoolTime = true;
+                IsAttackCoolTime = true;
                 Invoke("WaitAttackCoolTime", m_coolTimeCounter);
             }
         }
+
+        #endregion
     }
+
+    #region Cool Time Define
 
     void WaitAttackCoolTime()
     {
-        m_isAttackCoolTime = false;
+        IsAttackCoolTime = false;
     }
 
     void WaitmDeshCoolTime()
     {
-        m_isDeshCoolTime = false;
+        IsDeshCoolTime = false;
     }
 
-    #region Player Action
+    #endregion
 
-    void Move(Vector3 _moveDir)
-    {
-        transform.position += _moveDir * m_playerSpeed * Time.deltaTime;
-        transform.localScale = new Vector3(_moveDir.x, 1, 1);
-    }
+    #region Player Move Define
 
     void Jump()
     {
-        if (m_isGround)
+        if (IsGround)
         {
             m_rigidbody.AddForce(Vector3.up * m_jumpPower, ForceMode2D.Impulse);
-            m_isGround = false;
+            IsGround = false;
         }
-    }
-
-    void WeakAttack() 
-    {
-    }
-
-    void StrongAttack()
-    {
-    }
-
-    void Counter()
-    {
     }
 
     void Desh(Vector3 _moveDir)
@@ -176,11 +193,56 @@ public class PlayerController : MonoBehaviour
 
     #endregion
 
+    #region Player Action Define
+
+    void StrongAttack()
+    {
+    }
+
+    void Counter()
+    {
+    }
+
+    #endregion
+
+    #region Trigger/Collision
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
-            m_isGround = true;
+            IsGround = true;
     }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag(nameof(Define.TagName.DropItem)))
+        {
+            Define.ItemType itemType = other.gameObject.GetComponent<DropItem>().m_itemType;
+
+            switch (itemType)
+            {
+                case Define.ItemType.Weapon:
+                    {
+                        m_hasWeapon = true;
+                        GameObject go = Util.SearchChild(m_childs, "sword").gameObject;
+                        go.SetActive(true);
+                    }
+                    break;
+                case Define.ItemType.Desh:
+                    m_hasDesh = true;
+                    break;
+                case Define.ItemType.StrongAttack:
+                    m_hasStorngAttack = true;
+                    break;
+                case Define.ItemType.Counter:
+                    m_hasCounter = true;
+                    break;
+            }
+
+            Destroy(other.gameObject);
+        }
+    }
+
+    #endregion
 
     #endregion
 }

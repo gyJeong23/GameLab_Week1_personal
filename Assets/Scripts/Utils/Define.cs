@@ -15,6 +15,23 @@ public class Define
         Desh,
     }
 
+    public enum TagName
+    {
+        Default,
+        Player,
+        Ground,
+        DropItem,
+    }
+
+    public enum ItemType
+    { 
+        Default,
+        Weapon,
+        Desh,
+        StrongAttack,
+        Counter,
+    }
+
     #endregion
 
     #region PrivateVariables

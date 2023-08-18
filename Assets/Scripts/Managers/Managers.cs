@@ -5,16 +5,18 @@ using UnityEngine;
 public class Managers : MonoBehaviour
 {
     #region PublicVariables
+
+    public static Managers s_instance;
+
     #endregion
 
     #region PrivateVariables
 
-    public static Managers s_instance;
     static Managers Instance { get { Init(); return s_instance; } }
 
     #region Manager
     InputManager m_input = new InputManager();
-    public static InputManager Input { get { return s_instance.m_input; } }
+    public static InputManager Input { get { return Instance.m_input; } }
     #endregion
 
     #endregion

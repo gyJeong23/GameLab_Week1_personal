@@ -9,6 +9,8 @@ TagManager:
   - WeakAttack
   - Normal
   - DeadLine
+  - DropItem
+  - Monster
   layers:
   - Default
   - TransparentFX
