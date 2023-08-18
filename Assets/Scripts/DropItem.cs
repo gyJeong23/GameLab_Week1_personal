@@ -6,6 +6,9 @@ public class DropItem : MonoBehaviour
 {
     #region PublicVariables
 
+    Collider2D m_collider2D;
+    Rigidbody2D m_rigidbody2D;
+
     public Define.ItemType m_itemType = Define.ItemType.Weapon;
 
     #endregion
@@ -18,11 +21,18 @@ public class DropItem : MonoBehaviour
 
     #region PrivateMethod
 
+    private void Start()
+    {
+        m_collider2D = GetComponent<Collider2D>();
+        m_rigidbody2D = GetComponent<Rigidbody2D>();
+    }
+
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag(nameof(Define.TagName.Ground)))
-        { 
-            Destroy(gameObject);
+        {
+            m_collider2D.isTrigger = true;
+            m_rigidbody2D.isKinematic = true;
         }
     }
 
