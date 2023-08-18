@@ -26,6 +26,8 @@ public class PlayerController : MonoBehaviour
     bool m_isGround;
     bool m_isAttackCoolTime;
     bool m_isDeshCoolTime;
+   [SerializeField] bool m_hasWeapon;
+    bool m_hasSkill;
 
     #endregion
 
@@ -77,7 +79,8 @@ public class PlayerController : MonoBehaviour
         //    return;
         //}
 
-        //Player Action
+        #region Player Move
+
         if (Input.GetKey(KeyCode.A))
         {
             Move(Vector3.left);
@@ -106,7 +109,12 @@ public class PlayerController : MonoBehaviour
         {
             Jump();
         }
-        if (m_isAttackCoolTime == false)
+
+        #endregion
+
+        #region Player Action
+
+        if (m_isAttackCoolTime == false && m_hasWeapon == true)
         {
             if (Input.GetKeyDown(KeyCode.J))
             {
@@ -127,7 +135,11 @@ public class PlayerController : MonoBehaviour
                 Invoke("WaitAttackCoolTime", m_coolTimeCounter);
             }
         }
+
+        #endregion
     }
+
+    #region Cool Time Define
 
     void WaitAttackCoolTime()
     {
@@ -139,7 +151,9 @@ public class PlayerController : MonoBehaviour
         m_isDeshCoolTime = false;
     }
 
-    #region Player Action
+    #endregion
+
+    #region Player Move Define
 
     void Move(Vector3 _moveDir)
     {
@@ -156,6 +170,16 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    void Desh(Vector3 _moveDir)
+    {
+        m_rigidbody.velocity = Vector3.zero;
+        transform.position += Vector3.right * m_deshRange * _moveDir.x;
+    }
+
+    #endregion
+
+    #region Player Action Define
+
     void WeakAttack() 
     {
     }
@@ -167,19 +191,33 @@ public class PlayerController : MonoBehaviour
     void Counter()
     {
     }
-
-    void Desh(Vector3 _moveDir)
-    {
-        m_rigidbody.velocity = Vector3.zero;
-        transform.position += Vector3.right * m_deshRange * _moveDir.x;
-    }
-
+    
     #endregion
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
             m_isGround = true;
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag(nameof(Define.TagName.DropItem)))
+        {
+            Define.ItemType itemType = other.gameObject.GetComponent<DropItem>().m_itemType;
+
+            switch (itemType)
+            {
+                case Define.ItemType.Weapon:
+                    m_hasWeapon = true;
+                    break;
+                case Define.ItemType.Skill:
+                    m_hasSkill = true;
+                    break;
+            }
+
+            Destroy(other.gameObject);
+        }
     }
 
     #endregion
