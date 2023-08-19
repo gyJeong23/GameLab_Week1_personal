@@ -11,7 +11,7 @@ public class MonsterController : BaseController
     protected override float MoveSpeed { get; set; }
 
     protected override bool IsGrounded { get; set; }
-    protected override bool IsCanMove { get; set; }
+    protected override bool CanMove { get; set; }
     protected override bool IsActioning { get; set; }
     protected override bool IsDashing { get; set; }
 

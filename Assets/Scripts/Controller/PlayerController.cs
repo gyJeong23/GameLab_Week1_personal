@@ -14,7 +14,7 @@ using UnityEngine.SocialPlatforms;
     protected override float MoveSpeed { get; set; }
 
     protected override bool IsGrounded { get; set; }
-    protected override bool IsCanMove { get; set; }
+    protected override bool CanMove { get; set; }
     protected override bool IsActioning { get; set; }
     protected override bool IsDashing { get; set; }
 
@@ -49,12 +49,6 @@ using UnityEngine.SocialPlatforms;
 
     protected override void Init()
     {
-        Managers.Input.KeyAction -= OnKeyboard;
-        Managers.Input.KeyAction += OnKeyboard;
-
-        Managers.Input.KeyUpAction -= OnKeyboard;
-        Managers.Input.KeyUpAction += OnKeyboard;
-
         Util.SearchChild(transform, "sword").gameObject.SetActive(false);
 
         m_moveDir = Vector3.right;
@@ -62,20 +56,22 @@ using UnityEngine.SocialPlatforms;
 
     protected override void OnUpdate()
     {
+        OnKeyboard();
+
         if (IsDashing == true)
         { 
             Dash(m_moveDir, MoveSpeed);
         }    
         
-        Move(m_moveDir, MoveSpeed);
+        if (CanMove == true) 
+            Move(m_moveDir, MoveSpeed);
     }
 
     protected override void Move(Vector3 _moveDir, float _moveSpeed)
     {
-        if (IsCanMove == false) return;
+        if (CanMove == false) return;
 
         transform.position += _moveDir * _moveSpeed * Time.deltaTime;
-        //m_rigidbody.velocity = _moveDir * MoveSpeed  * Time.deltaTime;
 
         transform.localScale = new Vector3(_moveDir.x, 1, 1);
     }
@@ -88,35 +84,6 @@ using UnityEngine.SocialPlatforms;
 
     #region PrivateMethod
    
-    private Define.PlayerMoveState MoveState
-    {
-        get { return m_playerMoveState; }
-        set
-        {
-            m_playerMoveState = value;
-
-            switch (m_playerMoveState)
-            {
-                case Define.PlayerMoveState.Idle:
-                    { 
-                        IsCanMove = false;
-                    }
-                    break;
-                case Define.PlayerMoveState.Move:
-                    {
-                        IsCanMove = true;
-                    }
-                    break;
-                case Define.PlayerMoveState.Jump:
-                    {
-                        Jump();
-                    }
-                    break;
-                
-            }
-        }
-    }
-
     private Define.PlayerActionState ActionState
     {
         get { return m_playerActionState; }
@@ -171,23 +138,18 @@ using UnityEngine.SocialPlatforms;
 
         if (Input.GetKey(KeyCode.A) && IsDashing == false)
         {
-            MoveState = Define.PlayerMoveState.Move;
             m_moveDir = Vector3.left;
+            CanMove = true;
         }
         if (Input.GetKey(KeyCode.D) && IsDashing == false)
         {
-            MoveState = Define.PlayerMoveState.Move;
             m_moveDir = Vector3.right;
+            CanMove = true;
         }
         if (Input.GetKeyDown(KeyCode.W))
         {
-            MoveState = Define.PlayerMoveState.Jump;
+            Jump();
         }
-        if (Input.GetKeyUp(KeyCode.A) || Input.GetKeyUp(KeyCode.D))
-        {
-            MoveState = Define.PlayerMoveState.Idle;
-        }  
-
 
         #endregion
         #region Player Action
@@ -235,12 +197,9 @@ using UnityEngine.SocialPlatforms;
         yield return new WaitForSeconds(_coolTime);
 
         IsDashing = false;
-        MoveState = Define.PlayerMoveState.Idle;
     }
 
     #endregion
-
-    #region Player Move Define
 
     void Jump()
     {
@@ -249,10 +208,6 @@ using UnityEngine.SocialPlatforms;
         m_rigidbody.AddForce(Vector3.up * m_jumpPower, ForceMode2D.Impulse);
         IsGrounded = false;
     }
-
-    #endregion
-
-    #region Player Action Define
 
     void WeakAttack()
     { }
@@ -267,43 +222,8 @@ using UnityEngine.SocialPlatforms;
 
     void Dash(Vector3 _moveDir, float _moveSpeed)
     {
-
-        // 1. 애니메이션 끝날 때까지 속도 업
-        //while (m_animator.GetCurrentAnimatorStateInfo(0).normalizedTime < m_coolTimedash)
-        //{
-        //    Debug.Log($"dashing {m_animator.GetCurrentAnimatorStateInfo(0).normalizedTime} ");
-
-        //    MoveSpeed *= 2;
-        //    transform.position += _moveDir * MoveSpeed * Time.deltaTime;
-        //}
-        //MoveSpeed /= 2;
-
-        // 2. 순간적으로 중력 없애기
-        //float originGravity = m_rigidbody.gravityScale;
-        //m_rigidbody.gravityScale = 0;
-        //m_rigidbody.AddForce(_moveDir * m_dashPower, ForceMode2D.Impulse);
-
-        //m_rigidbody.gravityScale = originGravity;
-        //m_rigidbody.velocity = Vector3.zero;
-
-        // 3. Kinematic 사용
-        //m_rigidbody.bodyType = RigidbodyType2D.Kinematic;
-        //m_rigidbody.AddForce(_moveDir * m_dashPower * 10);
-
-        //yield return new WaitForSeconds(m_coolTimedash);
-        //m_rigidbody.bodyType = RigidbodyType2D.Dynamic;
-        //m_rigidbody.velocity = Vector3.zero;
-
-        // 4. moveSpeed 곱하기
         Move(_moveDir, _moveSpeed * m_dashPower);
-
-        //Isdashing = false;
-
-        //Vector3 destPos = new Vector3(transform.position.x + _moveDir.x * MoveSpeed, transform.position.y, transform.position.z);
-        //transform.position = Vector3.Lerp(transform.position ,destPos, 0.7f);
     }
-
-    #endregion
 
     #region Trigger/Collision
     private void OnCollisionEnter2D(Collision2D collision)
