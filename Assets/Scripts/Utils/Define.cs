@@ -4,15 +4,20 @@ using UnityEngine;
 
 public class Define
 {
-    #region PublicVariables
-
-    public enum PlayerState
+    public enum PlayerActionState
     {
         Idle,
         WeakAttack,
         StrongAttack,
         Counter,
-        Desh,
+        Dash,
+
+    }
+    public enum PlayerMoveState
+    {
+        Idle,
+        Move,
+        Jump,
     }
 
     public enum TagName
@@ -27,19 +32,9 @@ public class Define
     { 
         Default,
         Weapon,
-        Desh,
+        Dash,
         StrongAttack,
         Counter,
     }
 
-    #endregion
-
-    #region PrivateVariables
-    #endregion
-
-    #region PublicMethod
-    #endregion
-
-    #region PrivateMethod
-    #endregion
 }
