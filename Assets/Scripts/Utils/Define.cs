@@ -11,13 +11,16 @@ public class Define
         SpecialAttack,
         Counter,
         Dash,
-        Hit
+        Hit,
     }
-    public enum PlayerMoveState
+
+    public enum MonsterActionState
     {
         Idle,
         Move,
-        Jump,
+        DefualtAttack,
+        SpecialAttack,
+        Hit,
     }
 
     public enum TagName

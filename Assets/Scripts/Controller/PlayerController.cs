@@ -26,7 +26,6 @@ public class PlayerController : BaseController
     #region PrivateVariables
 
     [SerializeField] Define.PlayerActionState m_playerActionState;
-    [SerializeField] Define.PlayerMoveState m_playerMoveState;
 
     [SerializeField] float m_dashPower;
     [SerializeField] float m_jumpPower;
