@@ -10,10 +10,10 @@ public class MonsterController : BaseController
     #region ProtectedVariables
     protected override float MoveSpeed { get; set; }
 
-    protected override bool IsGround { get; set; }
-    protected override bool IsMove { get; set; }
-    protected override bool IsAttackCoolTime { get; set; }
-    protected override bool IsDeshCoolTime { get; set; }
+    protected override bool IsGrounded { get; set; }
+    protected override bool IsCanMove { get; set; }
+    protected override bool IsActioning { get; set; }
+    protected override bool IsDashing { get; set; }
 
     #endregion
 
@@ -41,9 +41,9 @@ public class MonsterController : BaseController
        
     }
 
-    protected override void Move(Vector3 _moveDir)
+    protected override void Move(Vector3 _moveDir, float _moveSpeed)
     {
-        transform.position += _moveDir * MoveSpeed * Time.deltaTime;
+        transform.position += _moveDir * _moveSpeed * Time.deltaTime;
 
         if (_moveDir.x < 0)
             transform.localScale= new Vector3(Mathf.Abs(transform.localScale.x) * -1, transform.localScale.y, transform.localScale.z);
@@ -64,9 +64,9 @@ public class MonsterController : BaseController
     {
         m_targetDir = m_target.transform.position - transform.position;
 
-        if (m_targetDir.magnitude < m_detectRange && IsGround)
+        if (m_targetDir.magnitude < m_detectRange && IsGrounded)
         {
-            Move(m_targetDir.normalized);
+            Move(m_targetDir.normalized, MoveSpeed);
         }
     }
 
@@ -74,7 +74,7 @@ public class MonsterController : BaseController
     {
         if (collision.gameObject.CompareTag(nameof(Define.TagName.Ground)))
         {
-            IsGround = true;
+            IsGrounded = true;
         }
     }
 
@@ -82,7 +82,7 @@ public class MonsterController : BaseController
     {
         if (collision.gameObject.CompareTag(nameof(Define.TagName.Ground)))
         {
-            IsGround = false;
+            IsGrounded = false;
         }
     }
 

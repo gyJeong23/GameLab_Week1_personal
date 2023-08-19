@@ -11,16 +11,15 @@ public abstract class BaseController : MonoBehaviour
 
     protected Rigidbody2D m_rigidbody;
     protected Animator m_animator;
-    protected Transform[] m_childs;
 
     [SerializeField] protected float m_moveSpeed;
 
     protected abstract float MoveSpeed { get; set; }
 
-    protected abstract bool IsGround { get; set; }
-    protected abstract bool IsMove { get; set; }
-    protected abstract bool IsAttackCoolTime { get; set; }
-    protected abstract bool IsDeshCoolTime { get; set; }
+    protected abstract bool IsGrounded { get; set; }
+    protected abstract bool IsCanMove { get; set; }
+    protected abstract bool IsActioning { get; set; }
+    protected abstract bool IsDashing { get; set; }
 
     #endregion
 
@@ -37,7 +36,6 @@ public abstract class BaseController : MonoBehaviour
     {
         m_rigidbody = GetComponent<Rigidbody2D>();
         m_animator = transform.GetComponentInChildren<Animator>();
-        m_childs = gameObject.GetComponentsInChildren<Transform>();
 
         #region Property Init
 
@@ -61,7 +59,7 @@ public abstract class BaseController : MonoBehaviour
 
     protected abstract void Init();
     protected abstract void OnUpdate();
-    protected abstract void Move(Vector3 _moveDir);
+    protected abstract void Move(Vector3 _moveDir, float _MoveSpeed);
     protected abstract void DefaultAttack();
 
     #endregion

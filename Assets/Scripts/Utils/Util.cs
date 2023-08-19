@@ -12,14 +12,21 @@ public class Util
 
     #region PublicMethod
 
-    public static Transform SearchChild(Transform[] _childs, string _name)
+    public static Transform SearchChild(Transform _parent, string _name)
     {
+        Transform[] _childs = _parent.GetComponentsInChildren<Transform>(true);
+
         foreach (Transform child in _childs)
         {
             if (child.gameObject.name == _name)
                 return child;
         }
         return null;
+    }
+
+    public bool IsAnimationEnd()
+    {
+        return true;
     }
 
     #endregion

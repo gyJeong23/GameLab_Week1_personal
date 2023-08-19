@@ -10,12 +10,14 @@ public class Define
         WeakAttack,
         StrongAttack,
         Counter,
+        Dash,
+
     }
     public enum PlayerMoveState
     {
         Idle,
         Move,
-        Desh,
+        Jump,
     }
 
     public enum TagName
@@ -30,7 +32,7 @@ public class Define
     { 
         Default,
         Weapon,
-        Desh,
+        Dash,
         StrongAttack,
         Counter,
     }
