@@ -1,10 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Numerics;
+using Unity.Burst.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SocialPlatforms;
+using Vector3 = UnityEngine.Vector3;
 
- public class PlayerController : BaseController
+public class PlayerController : BaseController
 {
     #region PublicVariables
     #endregion
@@ -31,14 +34,18 @@ using UnityEngine.SocialPlatforms;
     float m_WeakAttackcoolTime = 0.2f;
     float m_SpecialAttackcoolTime = 0.8f;
     float m_CounterCoolTime = 0.8f;
-    [SerializeField] float m_DashcoolTime;
+    float m_DashCoolTime = 0.5f;
+    float m_HitCoolTime = 0.5f;
     
     bool m_hasWeapon;
     bool m_hasdash;
     bool m_hasStorngAttack;
     bool m_hasCounter;
+    bool m_isCounter;
+    bool m_isHit;
 
     Vector3 m_moveDir;
+    Vector3 m_monsterVec;
 
     #endregion
 
@@ -108,8 +115,14 @@ using UnityEngine.SocialPlatforms;
                     break;
                 case Define.PlayerActionState.Dash:
                     {
-                        m_animator.CrossFade("Dash", 0.1f, -1, 0);
-                        StartCoroutine(nameof(DashOut), m_DashcoolTime);
+                        m_animator.CrossFade("Dash", 0.1f);
+                        StartCoroutine(nameof(DashOut), m_DashCoolTime);
+                    }
+                    break;
+                case Define.PlayerActionState.Hit:
+                    {
+                        m_animator.CrossFade("Hit", 0.1f, -1, 0);
+                        StartCoroutine(nameof(Hit), m_HitCoolTime);
                     }
                     break;
             }
@@ -183,6 +196,20 @@ using UnityEngine.SocialPlatforms;
         IsAttacking = false;
     }
 
+    IEnumerator Counter(string _counter, float _coolTime)
+    {
+        m_isCounter = true;
+
+        Transform counterTrigger = Util.SearchChild(transform, _counter);
+        counterTrigger.gameObject.SetActive(true);
+
+        yield return new WaitForSeconds(_coolTime);
+        counterTrigger.gameObject.SetActive(false);
+
+        ActionState = Define.PlayerActionState.Idle;
+        m_isCounter = false;
+    }
+
     void Jump()
     {
         if (IsGrounded == false) return;
@@ -193,7 +220,6 @@ using UnityEngine.SocialPlatforms;
 
     void Dash(Vector3 _moveDir, float _moveSpeed)
     {
-        StartCoroutine(nameof(DashOut), m_DashcoolTime);
         Move(_moveDir, _moveSpeed * m_dashPower);
     }
 
@@ -203,6 +229,42 @@ using UnityEngine.SocialPlatforms;
         yield return new WaitForSeconds(_coolTime);
 
         IsDashing = false;
+    }
+
+    IEnumerator Hit(float _cooltime)
+    {
+        m_isHit = true;
+
+        KnockBack(m_monsterVec);
+        //StartCoroutine(nameof(HitChangeBodyColor));
+
+        yield return new WaitForSeconds(_cooltime);
+        m_isHit = false;
+    }
+
+    //IEnumerator HitChangeBodyColor()
+    //{
+    //    SpriteRenderer[] spriteRenderers = gameObject.GetComponentsInChildren<SpriteRenderer>();
+    //    foreach (SpriteRenderer spriteRenderer in spriteRenderers)
+    //    {
+    //        spriteRenderer.color = new Color(1f, 132f/255f, 132f/255f);
+    //    }
+
+    //    yield return new WaitForSeconds(0.1f);
+    //    foreach (SpriteRenderer spriteRenderer in spriteRenderers)
+    //    {
+    //        spriteRenderer.color = Color.white;
+    //    }
+    //}
+
+    void KnockBack(Vector3 _mosterVec)
+    {
+        float knockBackPower = 1f;
+        Vector3 knockBackDir = new Vector3(_mosterVec.x, 0, 0).normalized;
+        knockBackDir += Vector3.up;
+
+        m_rigidbody.AddForce(knockBackDir * knockBackPower, ForceMode2D.Impulse);
+        Util.LimitVelocity2D(m_rigidbody, Vector3.one * 5f);
     }
 
     #region Trigger/Collision
@@ -239,6 +301,30 @@ using UnityEngine.SocialPlatforms;
             }
 
             Destroy(other.gameObject);
+        }
+
+        if (other.CompareTag(nameof(Define.TagName.MonsterAttack)))
+        {
+            if (m_isCounter == true)
+            {
+                // 수정 필요
+
+                Rigidbody2D otherRb;
+                other.gameObject.TryGetComponent<Rigidbody2D>(out otherRb);
+
+                Vector3 counterDir = new Vector3(other.transform.position.x - transform.position.x, 0, 0).normalized;
+                counterDir += Vector3.up;
+
+                otherRb.AddForce(counterDir * 1f, ForceMode2D.Impulse);
+                Util.LimitVelocity2D(otherRb, Vector3.one * 5f);
+
+                Debug.Log("counter");
+            }
+            else
+            {
+                m_monsterVec = transform.position - other.transform.position;
+                ActionState = Define.PlayerActionState.Hit;
+            }
         }
     }
 

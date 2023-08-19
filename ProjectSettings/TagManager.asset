@@ -11,6 +11,7 @@ TagManager:
   - DeadLine
   - DropItem
   - Monster
+  - MonsterAttack
   layers:
   - Default
   - TransparentFX

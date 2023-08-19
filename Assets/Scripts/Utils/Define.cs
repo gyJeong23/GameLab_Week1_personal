@@ -11,7 +11,7 @@ public class Define
         SpecialAttack,
         Counter,
         Dash,
-
+        Hit
     }
     public enum PlayerMoveState
     {
@@ -26,6 +26,8 @@ public class Define
         Player,
         Ground,
         DropItem,
+        Monster,
+        MonsterAttack,
     }
 
     public enum ItemType

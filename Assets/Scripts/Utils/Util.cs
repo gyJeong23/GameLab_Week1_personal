@@ -24,9 +24,12 @@ public class Util
         return null;
     }
 
-    public bool IsAnimationEnd()
-    {
-        return true;
+    public static void LimitVelocity2D(Rigidbody2D _rb, Vector3 _limit)
+    { 
+        if (_rb.velocity.magnitude > _limit.magnitude) 
+        {
+            _rb.velocity = _limit;
+        }
     }
 
     #endregion
