@@ -8,6 +8,7 @@ public class InputManager
     #region PublicVariables
 
     public Action KeyAction = null;
+    public Action KeyUpAction = null;
 
     #endregion
 
@@ -18,11 +19,15 @@ public class InputManager
 
     public void OnUpdate()
     {
-        if (Input.anyKey == false)
-            return;
+        //if (Input.anyKey == false && Input.anyKeyDown == false)
+        //    return;
 
         if (KeyAction != null)
             KeyAction.Invoke();
+
+        if (KeyUpAction != null)
+            KeyUpAction.Invoke();
+
     }
 
     #endregion

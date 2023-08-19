@@ -48,7 +48,7 @@ public class Managers : MonoBehaviour
 
     private void Update()
     {
-        m_input.OnUpdate();
+        m_input.OnUpdate(); 
     }
 
     #endregion
