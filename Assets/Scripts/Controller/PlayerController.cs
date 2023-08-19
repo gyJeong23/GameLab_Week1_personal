@@ -15,7 +15,7 @@ using UnityEngine.SocialPlatforms;
 
     protected override bool IsGrounded { get; set; }
     protected override bool CanMove { get; set; }
-    protected override bool IsActioning { get; set; }
+    protected override bool IsAttacking { get; set; }
     protected override bool IsDashing { get; set; }
 
     #endregion
@@ -28,10 +28,10 @@ using UnityEngine.SocialPlatforms;
     [SerializeField] float m_dashPower;
     [SerializeField] float m_jumpPower;
 
-    float m_coolTimeWeakAttack = 0.2f;
-    float m_coolTimeStrongAttack = 0.8f;
-    float m_coolTimeCounter = 0.8f;
-    [SerializeField] float m_coolTimeDash;
+    float m_WeakAttackcoolTime = 0.2f;
+    float m_SpecialAttackcoolTime = 0.8f;
+    float m_CounterCoolTime = 0.8f;
+    [SerializeField] float m_DashcoolTime;
     
     bool m_hasWeapon;
     bool m_hasdash;
@@ -62,24 +62,14 @@ using UnityEngine.SocialPlatforms;
         { 
             Dash(m_moveDir, MoveSpeed);
         }    
-        
-        if (CanMove == true) 
-            Move(m_moveDir, MoveSpeed);
     }
 
     protected override void Move(Vector3 _moveDir, float _moveSpeed)
     {
-        if (CanMove == false) return;
-
         transform.position += _moveDir * _moveSpeed * Time.deltaTime;
-
         transform.localScale = new Vector3(_moveDir.x, 1, 1);
     }
 
-    protected override void DefaultAttack()
-    {
-    }
-    
     #endregion 
 
     #region PrivateMethod
@@ -95,32 +85,31 @@ using UnityEngine.SocialPlatforms;
             {
                 case Define.PlayerActionState.Idle:
                     {
-                        m_animator.CrossFade("idle", 0.1f);
+                        m_animator.CrossFade("Idle", 0.1f);
                     }
                     break;
-                case Define.PlayerActionState.WeakAttack:
+                case Define.PlayerActionState.DefualtAttack:
                     {
-                        m_animator.CrossFade("WeakAttack", 0.1f, -1, 0);
-                        StartCoroutine(nameof(WaitActionCoolTime), m_coolTimeWeakAttack);
+                        m_animator.CrossFade("DefaultAttack", 0.1f, -1, 0);
+                        StartCoroutine(Attack("DefaultAttack", m_WeakAttackcoolTime));
                     }
                     break;
-                case Define.PlayerActionState.StrongAttack:
+                case Define.PlayerActionState.SpecialAttack:
                     {
-                        m_animator.CrossFade("StrongAttack", 0.1f, -1, 0);
-                        StartCoroutine(nameof(WaitActionCoolTime), m_coolTimeStrongAttack);
+                        m_animator.CrossFade("SpecialAttack", 0.1f, -1, 0);
+                        StartCoroutine(Attack("SpecialAttack", m_SpecialAttackcoolTime));
                     }
                     break;
                 case Define.PlayerActionState.Counter:
                     {
                         m_animator.CrossFade("Counter", 0.1f, -1, 0);
-                        StartCoroutine(nameof(WaitActionCoolTime), m_coolTimeCounter);
+                        StartCoroutine(Attack("Counter", m_CounterCoolTime));
                     }
                     break;
                 case Define.PlayerActionState.Dash:
                     {
-                        IsDashing = true;
                         m_animator.CrossFade("Dash", 0.1f, -1, 0);
-                        StartCoroutine(nameof(WaitDashCoolTime), m_coolTimeDash);
+                        StartCoroutine(nameof(DashOut), m_DashcoolTime);
                     }
                     break;
             }
@@ -139,12 +128,12 @@ using UnityEngine.SocialPlatforms;
         if (Input.GetKey(KeyCode.A) && IsDashing == false)
         {
             m_moveDir = Vector3.left;
-            CanMove = true;
+            Move(m_moveDir, m_moveSpeed);
         }
         if (Input.GetKey(KeyCode.D) && IsDashing == false)
         {
             m_moveDir = Vector3.right;
-            CanMove = true;
+            Move(m_moveDir, m_moveSpeed);
         }
         if (Input.GetKeyDown(KeyCode.W))
         {
@@ -154,24 +143,24 @@ using UnityEngine.SocialPlatforms;
         #endregion
         #region Player Action
 
-        if (IsActioning == false /*&& Isdashing == false*/)
+        if (IsAttacking == false /*&& Isdashing == false*/)
         {
             if (m_hasWeapon == true)
             {
                 if (Input.GetKeyDown(KeyCode.J))
                 {
-                    ActionState = Define.PlayerActionState.WeakAttack;
+                    ActionState = Define.PlayerActionState.DefualtAttack;
                 }
                 if (Input.GetKeyDown(KeyCode.K) && m_hasStorngAttack)
                 {
-                    ActionState = Define.PlayerActionState.StrongAttack;
+                    ActionState = Define.PlayerActionState.SpecialAttack;
                 }
                 if (Input.GetKeyDown(KeyCode.L) && m_hasCounter)
                 {
                     ActionState = Define.PlayerActionState.Counter;
                 }
             }
-            if (Input.GetKeyDown(KeyCode.LeftShift) && m_hasdash && IsDashing == false && IsActioning == false)
+            if (Input.GetKeyDown(KeyCode.LeftShift) && m_hasdash && IsDashing == false)
             {
                 ActionState = Define.PlayerActionState.Dash;
             }
@@ -179,27 +168,20 @@ using UnityEngine.SocialPlatforms;
 
         #endregion
     }
-
-    #region Cool Time Define
-
-    IEnumerator WaitActionCoolTime(float _coolTime)
+    
+    IEnumerator Attack(string _attack, float _coolTime)
     {
-        IsActioning = true;
-        yield return new WaitForSeconds(_coolTime);
+        IsAttacking = true;
 
-        IsActioning = false;
+        Transform attackTrigger = Util.SearchChild(transform, _attack);
+        attackTrigger.gameObject.SetActive(true);
+
+        yield return new WaitForSeconds(_coolTime);
+        attackTrigger.gameObject.SetActive(false);
+
         ActionState = Define.PlayerActionState.Idle;
+        IsAttacking = false;
     }
-
-    IEnumerator WaitDashCoolTime(float _coolTime)
-    {
-        IsDashing = true;
-        yield return new WaitForSeconds(_coolTime);
-
-        IsDashing = false;
-    }
-
-    #endregion
 
     void Jump()
     {
@@ -209,20 +191,18 @@ using UnityEngine.SocialPlatforms;
         IsGrounded = false;
     }
 
-    void WeakAttack()
-    { }
-
-    void StrongAttack()
-    {
-    }
-
-    void Counter()
-    {
-    }
-
     void Dash(Vector3 _moveDir, float _moveSpeed)
     {
+        StartCoroutine(nameof(DashOut), m_DashcoolTime);
         Move(_moveDir, _moveSpeed * m_dashPower);
+    }
+
+    IEnumerator DashOut(float _coolTime)
+    {
+        IsDashing = true;
+        yield return new WaitForSeconds(_coolTime);
+
+        IsDashing = false;
     }
 
     #region Trigger/Collision

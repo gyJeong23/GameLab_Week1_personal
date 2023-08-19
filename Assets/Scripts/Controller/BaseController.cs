@@ -18,7 +18,7 @@ public abstract class BaseController : MonoBehaviour
 
     protected abstract bool IsGrounded { get; set; }
     protected abstract bool CanMove { get; set; }
-    protected abstract bool IsActioning { get; set; }
+    protected abstract bool IsAttacking { get; set; }
     protected abstract bool IsDashing { get; set; }
 
     #endregion
@@ -60,7 +60,6 @@ public abstract class BaseController : MonoBehaviour
     protected abstract void Init();
     protected abstract void OnUpdate();
     protected abstract void Move(Vector3 _moveDir, float _MoveSpeed);
-    protected abstract void DefaultAttack();
 
     #endregion
 

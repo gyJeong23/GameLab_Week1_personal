@@ -7,8 +7,8 @@ public class Define
     public enum PlayerActionState
     {
         Idle,
-        WeakAttack,
-        StrongAttack,
+        DefualtAttack,
+        SpecialAttack,
         Counter,
         Dash,
 
