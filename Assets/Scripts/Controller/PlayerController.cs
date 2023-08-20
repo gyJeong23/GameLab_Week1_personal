@@ -26,7 +26,7 @@ public class PlayerController : BaseController
 
     #region PrivateVariables
 
-    [SerializeField] Define.PlayerActionState m_playerActionState;
+    [SerializeField] Define.PlayerState m_playerActionState;
 
     [SerializeField] float m_dashPower;
     [SerializeField] float m_jumpPower;
@@ -64,14 +64,13 @@ public class PlayerController : BaseController
         Util.SearchChild(transform, "sword").gameObject.SetActive(false);
 
         m_moveDir = Vector3.right;
-
-        //m_heartCounter = new Stack<bool>();
-        //for (int i = 0; i < m_life; i++)
-        //    m_heartCounter.Push(true);
     }
 
     protected override void OnUpdate()
     {
+        if (m_isDead)
+            Dead();
+
         OnKeyboard();
 
         if (IsDashing == true)
@@ -88,7 +87,7 @@ public class PlayerController : BaseController
 
     #region PrivateMethod
 
-    private Define.PlayerActionState ActionState
+    private Define.PlayerState ActionState
     {
         get { return m_playerActionState; }
         set
@@ -97,45 +96,45 @@ public class PlayerController : BaseController
 
             switch (m_playerActionState)
             {
-                case Define.PlayerActionState.Idle:
+                case Define.PlayerState.Idle:
                     {
                         m_animator.CrossFade("Idle", 0.1f);
                     }
                     break;
-                case Define.PlayerActionState.DefualtAttack:
+                case Define.PlayerState.DefualtAttack:
                     {
                         m_animator.CrossFade("DefaultAttack", 0.1f);
                         StartCoroutine(Attack("DefaultAttack", m_defaultCoolTime));
                     }
                     break;
-                case Define.PlayerActionState.SpecialAttack:
+                case Define.PlayerState.SpecialAttack:
                     {
                         m_animator.CrossFade("SpecialAttack", 0.1f);
                         StartCoroutine(Attack("SpecialAttack", m_specialCoolTime));
                     }
                     break;
-                case Define.PlayerActionState.Counter:
+                case Define.PlayerState.Counter:
                     {
                         m_animator.CrossFade("Counter", 0.1f);
                         StartCoroutine(Attack("Counter", m_counterCoolTime));
                     }
                     break;
-                case Define.PlayerActionState.Dash:
+                case Define.PlayerState.Dash:
                     {
                         m_animator.CrossFade("Dash", 0.1f);
                         StartCoroutine(nameof(DashOut), m_dashCoolTime);
                     }
                     break;
-                case Define.PlayerActionState.Hit:
+                case Define.PlayerState.Hit:
                     {
                         m_animator.CrossFade("Hit", 0.1f);
                         StartCoroutine(nameof(Hit), m_hitCoolTime);
                     }
                     break;
-                case Define.PlayerActionState.Die:
+                case Define.PlayerState.Die:
                     {
-                        m_animator.SetBool("isDead", true);
-                        Die();
+                        m_animator.CrossFade("Hit", 0.1f);
+                        StartCoroutine(nameof(Die));
                     }
                     break;
             }
@@ -155,7 +154,7 @@ public class PlayerController : BaseController
 
             else
                 return;
-        } 
+        }
 
 
         if (Input.GetKey(KeyCode.A) && IsDashing == false)
@@ -179,20 +178,20 @@ public class PlayerController : BaseController
             {
                 if (Input.GetKeyDown(KeyCode.J))
                 {
-                    ActionState = Define.PlayerActionState.DefualtAttack;
+                    ActionState = Define.PlayerState.DefualtAttack;
                 }
                 if (Input.GetKeyDown(KeyCode.K) && m_hasSpecialAttack)
                 {
-                    ActionState = Define.PlayerActionState.SpecialAttack;
+                    ActionState = Define.PlayerState.SpecialAttack;
                 }
                 if (Input.GetKeyDown(KeyCode.L) && m_hasCounter)
                 {
-                    ActionState = Define.PlayerActionState.Counter;
+                    ActionState = Define.PlayerState.Counter;
                 }
             }
             if (Input.GetKeyDown(KeyCode.LeftShift) && m_hasdash && IsDashing == false)
             {
-                ActionState = Define.PlayerActionState.Dash;
+                ActionState = Define.PlayerState.Dash;
             }
         }
 
@@ -209,7 +208,7 @@ public class PlayerController : BaseController
         yield return new WaitForSeconds(_coolTime);
         attackTrigger.gameObject.SetActive(false);
 
-        ActionState = Define.PlayerActionState.Idle;
+        ActionState = Define.PlayerState.Idle;
         IsAttacking = false;
     }
 
@@ -223,7 +222,7 @@ public class PlayerController : BaseController
         yield return new WaitForSeconds(_coolTime);
         counterTrigger.gameObject.SetActive(false);
 
-        ActionState = Define.PlayerActionState.Idle;
+        ActionState = Define.PlayerState.Idle;
         m_isCounter = false;
     }
 
@@ -231,7 +230,7 @@ public class PlayerController : BaseController
     {
         if (IsGround == false) return;
 
-        m_rigidbody.AddForce(Vector3.up * m_jumpPower, ForceMode2D.Impulse);
+        m_rigidbody.velocity = Vector3.up * m_jumpPower;
         IsGround = false;
     }
 
@@ -252,45 +251,37 @@ public class PlayerController : BaseController
     {
         m_isHit = true;
 
-        //StartCoroutine(nameof(HitChangeBodyColor));
-
         yield return new WaitForSeconds(_cooltime);
         m_isHit = false;
     }
-
-    //IEnumerator HitChangeBodyColor()
-    //{
-    //    SpriteRenderer[] spriteRenderers = gameObject.GetComponentsInChildren<SpriteRenderer>();
-    //    foreach (SpriteRenderer spriteRenderer in spriteRenderers)
-    //    {
-    //        spriteRenderer.color = new Color(1f, 132f/255f, 132f/255f);
-    //    }
-
-    //    yield return new WaitForSeconds(0.1f);
-    //    foreach (SpriteRenderer spriteRenderer in spriteRenderers)
-    //    {
-    //        spriteRenderer.color = Color.white;
-    //    }
-    //}
 
     void KnockBack(Vector3 _mosterVec)
     {
         Vector3 knockBackDir = new Vector3(_mosterVec.x, 0, 0).normalized;
         knockBackDir += Vector3.up;
 
-        //m_rigidbody.AddForce(knockBackDir * m_knockBackPower, ForceMode2D.Impulse);
         m_rigidbody.velocity = knockBackDir * m_knockBackPower;
         Util.LimitVelocity2D(m_rigidbody, Vector3.one * m_knockBackPower);
     }
 
-    void Die()
+    IEnumerator Die()
     {
         m_isDead = true;
+
+        yield return new WaitForSeconds(m_hitCoolTime / 2);
+
+        m_animator.SetBool("isDead", true);
+    }
+
+    void Dead()
+    {
         CircleCollider2D playerCollider;
         TryGetComponent<CircleCollider2D>(out playerCollider);
         playerCollider.isTrigger = true;
-    }
 
+        if (IsGround)
+            m_rigidbody.bodyType = RigidbodyType2D.Static;
+    }
 
     #region Trigger/Collision
     private void OnCollisionEnter2D(Collision2D collision)
@@ -355,14 +346,10 @@ public class PlayerController : BaseController
                     m_heartUIs[m_life].SetActive(false);
 
                 if (m_life < 1)
-                    ActionState = Define.PlayerActionState.Die;
+                    ActionState = Define.PlayerState.Die;
                 else
-                    ActionState = Define.PlayerActionState.Hit;
+                    ActionState = Define.PlayerState.Hit;
             }
-            //else
-            //{
-            //    KnockBack(monsterToPlayerVec);
-            //}
         }
     }
     #endregion

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Define
 {
-    public enum PlayerActionState
+    public enum PlayerState
     {
         Idle,
         DefualtAttack,
@@ -15,19 +15,22 @@ public class Define
         Die,
     }
 
-    public enum MonsterActionState
+    public enum MonsterState
     {
         Idle,
         Move,
         DefualtAttack,
         SpecialAttack,
         Hit,
+        Die,
     }
 
     public enum TagName
     {
         Default,
         Player,
+        WeakAttack,
+        StrongAttack,
         Ground,
         DropItem,
         Monster,
