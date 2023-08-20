@@ -17,7 +17,7 @@ public class PlayerController : BaseController
 
     protected override float MoveSpeed { get; set; }
 
-    protected override bool IsGrounded { get; set; }
+    protected override bool IsGround { get; set; }
     protected override bool CanMove { get; set; }
     protected override bool IsAttacking { get; set; }
     protected override bool IsDashing { get; set; }
@@ -35,16 +35,16 @@ public class PlayerController : BaseController
 
     int m_life = 5;
 
-    float m_WeakAttackcoolTime = 0.2f;
-    float m_SpecialAttackcoolTime = 0.8f;
-    float m_CounterCoolTime = 0.8f;
-    float m_DashCoolTime = 0.5f;
-    float m_HitCoolTime = 1f;
+    float m_defaultCoolTime = 0.2f;
+    float m_specialCoolTime = 0.8f;
+    float m_counterCoolTime = 0.8f;
+    float m_dashCoolTime = 0.5f;
+    float m_hitCoolTime = 1f;
     float m_knockBackPower = 5f;
 
     bool m_hasWeapon;
     bool m_hasdash;
-    bool m_hasStorngAttack;
+    bool m_hasSpecialAttack;
     bool m_hasCounter;
     bool m_isCounter;
     bool m_isHit;
@@ -105,31 +105,31 @@ public class PlayerController : BaseController
                 case Define.PlayerActionState.DefualtAttack:
                     {
                         m_animator.CrossFade("DefaultAttack", 0.1f);
-                        StartCoroutine(Attack("DefaultAttack", m_WeakAttackcoolTime));
+                        StartCoroutine(Attack("DefaultAttack", m_defaultCoolTime));
                     }
                     break;
                 case Define.PlayerActionState.SpecialAttack:
                     {
                         m_animator.CrossFade("SpecialAttack", 0.1f);
-                        StartCoroutine(Attack("SpecialAttack", m_SpecialAttackcoolTime));
+                        StartCoroutine(Attack("SpecialAttack", m_specialCoolTime));
                     }
                     break;
                 case Define.PlayerActionState.Counter:
                     {
                         m_animator.CrossFade("Counter", 0.1f);
-                        StartCoroutine(Attack("Counter", m_CounterCoolTime));
+                        StartCoroutine(Attack("Counter", m_counterCoolTime));
                     }
                     break;
                 case Define.PlayerActionState.Dash:
                     {
                         m_animator.CrossFade("Dash", 0.1f);
-                        StartCoroutine(nameof(DashOut), m_DashCoolTime);
+                        StartCoroutine(nameof(DashOut), m_dashCoolTime);
                     }
                     break;
                 case Define.PlayerActionState.Hit:
                     {
                         m_animator.CrossFade("Hit", 0.1f);
-                        StartCoroutine(nameof(Hit), m_HitCoolTime);
+                        StartCoroutine(nameof(Hit), m_hitCoolTime);
                     }
                     break;
                 case Define.PlayerActionState.Die:
@@ -181,7 +181,7 @@ public class PlayerController : BaseController
                 {
                     ActionState = Define.PlayerActionState.DefualtAttack;
                 }
-                if (Input.GetKeyDown(KeyCode.K) && m_hasStorngAttack)
+                if (Input.GetKeyDown(KeyCode.K) && m_hasSpecialAttack)
                 {
                     ActionState = Define.PlayerActionState.SpecialAttack;
                 }
@@ -229,10 +229,10 @@ public class PlayerController : BaseController
 
     void Jump()
     {
-        if (IsGrounded == false) return;
+        if (IsGround == false) return;
 
         m_rigidbody.AddForce(Vector3.up * m_jumpPower, ForceMode2D.Impulse);
-        IsGrounded = false;
+        IsGround = false;
     }
 
     void Dash(Vector3 _moveDir, float _moveSpeed)
@@ -296,7 +296,7 @@ public class PlayerController : BaseController
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
-            IsGrounded = true;
+            IsGround = true;
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -318,7 +318,7 @@ public class PlayerController : BaseController
                     m_hasdash = true;
                     break;
                 case Define.ItemType.StrongAttack:
-                    m_hasStorngAttack = true;
+                    m_hasSpecialAttack = true;
                     break;
                 case Define.ItemType.Counter:
                     m_hasCounter = true;

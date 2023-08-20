@@ -16,7 +16,7 @@ public abstract class BaseController : MonoBehaviour
 
     protected abstract float MoveSpeed { get; set; }
 
-    protected abstract bool IsGrounded { get; set; }
+    protected abstract bool IsGround { get; set; }
     protected abstract bool CanMove { get; set; }
     protected abstract bool IsAttacking { get; set; }
     protected abstract bool IsDashing { get; set; }
