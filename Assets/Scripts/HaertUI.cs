@@ -9,7 +9,9 @@ public class HaertUI : MonoBehaviour
 
     #region PrivateVariables
 
-    [SerializeField] Vector3 m_UIpos;
+    [SerializeField] PlayerController m_player;
+
+    Vector3 m_UIpos;
 
     #endregion
 
@@ -20,7 +22,8 @@ public class HaertUI : MonoBehaviour
 
     private void Start()
     {
-        m_UIpos = transform.position = Camera.main.WorldToScreenPoint(transform.position);
+        m_player = GetComponent<PlayerController>();
+        m_UIpos = Camera.main.WorldToScreenPoint(transform.position);
     }
 
     private void LateUpdate()

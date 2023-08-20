@@ -4,6 +4,7 @@ using System.Numerics;
 using Unity.Burst.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.SocialPlatforms;
 using Vector3 = UnityEngine.Vector3;
 
@@ -30,21 +31,26 @@ public class PlayerController : BaseController
     [SerializeField] float m_dashPower;
     [SerializeField] float m_jumpPower;
 
+    public GameObject[] m_heartUIs;
+
+    int m_life = 5;
+
     float m_WeakAttackcoolTime = 0.2f;
     float m_SpecialAttackcoolTime = 0.8f;
     float m_CounterCoolTime = 0.8f;
     float m_DashCoolTime = 0.5f;
-    float m_HitCoolTime = 0.5f;
-    
+    float m_HitCoolTime = 1f;
+    float m_knockBackPower = 5f;
+
     bool m_hasWeapon;
     bool m_hasdash;
     bool m_hasStorngAttack;
     bool m_hasCounter;
     bool m_isCounter;
     bool m_isHit;
+    bool m_isDead;
 
     Vector3 m_moveDir;
-    Vector3 m_monsterVec;
 
     #endregion
 
@@ -58,6 +64,10 @@ public class PlayerController : BaseController
         Util.SearchChild(transform, "sword").gameObject.SetActive(false);
 
         m_moveDir = Vector3.right;
+
+        //m_heartCounter = new Stack<bool>();
+        //for (int i = 0; i < m_life; i++)
+        //    m_heartCounter.Push(true);
     }
 
     protected override void OnUpdate()
@@ -65,9 +75,7 @@ public class PlayerController : BaseController
         OnKeyboard();
 
         if (IsDashing == true)
-        { 
             Dash(m_moveDir, MoveSpeed);
-        }    
     }
 
     protected override void Move(Vector3 _moveDir, float _moveSpeed)
@@ -76,10 +84,10 @@ public class PlayerController : BaseController
         transform.localScale = new Vector3(_moveDir.x, 1, 1);
     }
 
-    #endregion 
+    #endregion
 
     #region PrivateMethod
-   
+
     private Define.PlayerActionState ActionState
     {
         get { return m_playerActionState; }
@@ -96,19 +104,19 @@ public class PlayerController : BaseController
                     break;
                 case Define.PlayerActionState.DefualtAttack:
                     {
-                        m_animator.CrossFade("DefaultAttack", 0.1f, -1, 0);
+                        m_animator.CrossFade("DefaultAttack", 0.1f);
                         StartCoroutine(Attack("DefaultAttack", m_WeakAttackcoolTime));
                     }
                     break;
                 case Define.PlayerActionState.SpecialAttack:
                     {
-                        m_animator.CrossFade("SpecialAttack", 0.1f, -1, 0);
+                        m_animator.CrossFade("SpecialAttack", 0.1f);
                         StartCoroutine(Attack("SpecialAttack", m_SpecialAttackcoolTime));
                     }
                     break;
                 case Define.PlayerActionState.Counter:
                     {
-                        m_animator.CrossFade("Counter", 0.1f, -1, 0);
+                        m_animator.CrossFade("Counter", 0.1f);
                         StartCoroutine(Attack("Counter", m_CounterCoolTime));
                     }
                     break;
@@ -120,8 +128,14 @@ public class PlayerController : BaseController
                     break;
                 case Define.PlayerActionState.Hit:
                     {
-                        m_animator.CrossFade("Hit", 0.1f, -1, 0);
+                        m_animator.CrossFade("Hit", 0.1f);
                         StartCoroutine(nameof(Hit), m_HitCoolTime);
+                    }
+                    break;
+                case Define.PlayerActionState.Die:
+                    {
+                        m_animator.SetBool("isDead", true);
+                        Die();
                     }
                     break;
             }
@@ -134,8 +148,15 @@ public class PlayerController : BaseController
         //{
         //    return;
         //}
+        if (m_isDead)
+        {
+            if (Input.GetKey(KeyCode.R))
+                SceneManager.LoadScene(0);
 
-        #region Player Move
+            else
+                return;
+        } 
+
 
         if (Input.GetKey(KeyCode.A) && IsDashing == false)
         {
@@ -148,11 +169,8 @@ public class PlayerController : BaseController
             Move(m_moveDir, m_moveSpeed);
         }
         if (Input.GetKeyDown(KeyCode.W))
-        {
             Jump();
-        }
 
-        #endregion
         #region Player Action
 
         if (IsAttacking == false /*&& Isdashing == false*/)
@@ -180,7 +198,7 @@ public class PlayerController : BaseController
 
         #endregion
     }
-    
+
     IEnumerator Attack(string _attack, float _coolTime)
     {
         IsAttacking = true;
@@ -234,7 +252,6 @@ public class PlayerController : BaseController
     {
         m_isHit = true;
 
-        KnockBack(m_monsterVec);
         //StartCoroutine(nameof(HitChangeBodyColor));
 
         yield return new WaitForSeconds(_cooltime);
@@ -258,13 +275,22 @@ public class PlayerController : BaseController
 
     void KnockBack(Vector3 _mosterVec)
     {
-        float knockBackPower = 1f;
         Vector3 knockBackDir = new Vector3(_mosterVec.x, 0, 0).normalized;
         knockBackDir += Vector3.up;
 
-        m_rigidbody.AddForce(knockBackDir * knockBackPower, ForceMode2D.Impulse);
-        Util.LimitVelocity2D(m_rigidbody, Vector3.one * 5f);
+        //m_rigidbody.AddForce(knockBackDir * m_knockBackPower, ForceMode2D.Impulse);
+        m_rigidbody.velocity = knockBackDir * m_knockBackPower;
+        Util.LimitVelocity2D(m_rigidbody, Vector3.one * m_knockBackPower);
     }
+
+    void Die()
+    {
+        m_isDead = true;
+        CircleCollider2D playerCollider;
+        TryGetComponent<CircleCollider2D>(out playerCollider);
+        playerCollider.isTrigger = true;
+    }
+
 
     #region Trigger/Collision
     private void OnCollisionEnter2D(Collision2D collision)
@@ -302,32 +328,44 @@ public class PlayerController : BaseController
             Destroy(other.gameObject);
         }
 
-        if (other.CompareTag(nameof(Define.TagName.MonsterAttack)))
+        if (other.CompareTag(nameof(Define.TagName.MonsterAttack)) && m_isDead == false)
         {
-            if (m_isCounter == true)
+            Vector3 monsterToPlayerVec = transform.position - other.transform.position;
+
+            //if (m_isCounter == true) // 수정 필요
+            //{
+            //    Rigidbody2D otherRb;
+            //    other.gameObject.TryGetComponent<Rigidbody2D>(out otherRb);
+
+            //    Vector3 counterDir = new Vector3(other.transform.position.x - transform.position.x, 0, 0).normalized;
+            //    counterDir += Vector3.up;
+
+            //    otherRb.AddForce(counterDir * 1f, ForceMode2D.Impulse);
+            //    Util.LimitVelocity2D(otherRb, Vector3.one * 5f);
+
+            //    Debug.Log("counter");
+            //}
+            //else 
+            if (m_isHit == false)
             {
-                // 수정 필요
+                KnockBack(monsterToPlayerVec);
 
-                Rigidbody2D otherRb;
-                other.gameObject.TryGetComponent<Rigidbody2D>(out otherRb);
+                m_life--;
+                if (m_life >= 0)
+                    m_heartUIs[m_life].SetActive(false);
 
-                Vector3 counterDir = new Vector3(other.transform.position.x - transform.position.x, 0, 0).normalized;
-                counterDir += Vector3.up;
-
-                otherRb.AddForce(counterDir * 1f, ForceMode2D.Impulse);
-                Util.LimitVelocity2D(otherRb, Vector3.one * 5f);
-
-                Debug.Log("counter");
+                if (m_life < 1)
+                    ActionState = Define.PlayerActionState.Die;
+                else
+                    ActionState = Define.PlayerActionState.Hit;
             }
-            else
-            {
-                m_monsterVec = transform.position - other.transform.position;
-                ActionState = Define.PlayerActionState.Hit;
-            }
+            //else
+            //{
+            //    KnockBack(monsterToPlayerVec);
+            //}
         }
     }
-
     #endregion
 
-    #endregion
 }
+#endregion

@@ -12,6 +12,7 @@ public class Define
         Counter,
         Dash,
         Hit,
+        Die,
     }
 
     public enum MonsterActionState
