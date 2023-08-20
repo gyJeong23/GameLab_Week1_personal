@@ -20,6 +20,13 @@ public class Define
         Jump,
     }
 
+    public enum SceneType
+    {
+        UnKnown,
+        GameScene,
+        MeneScene,
+    }
+
     public enum TagName
     {
         Default,
