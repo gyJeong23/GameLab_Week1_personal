@@ -439,6 +439,7 @@ GameObject:
   - component: {fileID: 5479087186529521280}
   - component: {fileID: 5479087186529521281}
   - component: {fileID: 6868867862879864807}
+  - component: {fileID: 927333367}
   m_Layer: 0
   m_Name: Slime
   m_TagString: Monster
@@ -454,7 +455,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5479087186529521310}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -479,9 +480,9 @@ Rigidbody2D:
   m_AngularDrag: 0.05
   m_GravityScale: 1
   m_Material: {fileID: 0}
-  m_Interpolate: 0
+  m_Interpolate: 2
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 4
 --- !u!61 &5479087186529521281
 BoxCollider2D:
@@ -520,6 +521,30 @@ SortingGroup:
   m_SortingLayerID: -182883799
   m_SortingLayer: 3
   m_SortingOrder: 0
+--- !u!114 &927333367
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5479087186529521310}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d55eb77403752c644a4e36baf5ed55d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_currentState: 0
+  m_mosterState: 0
+  m_life: 3
+  m_thinkTime: 1
+  m_defaultCoolTime: 1
+  m_specialCoolTime: 5
+  m_hitCoolTime: 0.5
+  m_detectRange: 10
+  m_defaultAttackRange: 2
+  m_specialAttackRange: 3
+  m_moveSpeed: 4
+  m_knockBackPower: 5
 --- !u!1 &5479087186557330870
 GameObject:
   m_ObjectHideFlags: 0

@@ -231,7 +231,6 @@ public class PlayerController : BaseController
         if (IsGround == false) return;
 
         m_rigidbody.velocity = Vector3.up * m_jumpPower;
-        IsGround = false;
     }
 
     void Dash(Vector3 _moveDir, float _moveSpeed)
@@ -288,6 +287,12 @@ public class PlayerController : BaseController
     {
         if (collision.gameObject.CompareTag("Ground"))
             IsGround = true;
+    }
+
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Ground"))
+            IsGround = false;
     }
 
     private void OnTriggerEnter2D(Collider2D other)

@@ -44,6 +44,8 @@ public class Slime : MonoBehaviour
                     {
                         m_animator.SetTrigger("onDefaultAttack");
                         StartCoroutine(AttackState("DefaultAttack", m_defaultCoolTime));
+                        m_currentState = Define.MonsterState.Move;
+
                     }
                     break;
                 case Define.MonsterState.SpecialAttack:
@@ -59,6 +61,7 @@ public class Slime : MonoBehaviour
                     {
                         m_animator.SetTrigger("onHit");
                         StartCoroutine(nameof(Hit), m_hitCoolTime);
+                        m_currentState = Define.MonsterState.Move;
                     }
                     break;
                 case Define.MonsterState.Die:
@@ -125,6 +128,8 @@ public class Slime : MonoBehaviour
         {
             m_thinkTimeCounter = 0;
             MonsterState = m_currentState;
+
+            Debug.Log($"{gameObject.name} : {MonsterState}");
         }
         else
             m_thinkTimeCounter += Time.deltaTime;
@@ -177,14 +182,15 @@ public class Slime : MonoBehaviour
         {
             if (m_targetDistance < m_specialAttackRange && m_canSpecialAttack)
                 m_currentState = Define.MonsterState.SpecialAttack;
-            if (m_targetDistance < m_defaultAttackRange)
+            else if (m_targetDistance < m_defaultAttackRange)
                 m_currentState = Define.MonsterState.DefualtAttack;
         }
 
         if (m_targetDistance > m_detectRange)
             m_currentState = Define.MonsterState.Idle;
 
-        m_moveDir = new Vector3((m_targetTransform.position - transform.position).x, 0).normalized;
+        if (m_targetDistance > 1f)
+            m_moveDir = new Vector3((m_targetTransform.position - transform.position).x, 0).normalized;
 
         Move(m_moveDir, m_moveSpeed * 1.5f);
     }
@@ -195,20 +201,22 @@ public class Slime : MonoBehaviour
 
         Transform attackTrigger = Util.SearchChild(transform, _attack);
         attackTrigger.gameObject.SetActive(true);
+        float curAnimationTime = m_animator.GetCurrentAnimatorStateInfo(0).length;
 
-        yield return new WaitForSeconds(_coolTime);
-
+        yield return new WaitForSeconds(curAnimationTime);
         attackTrigger.gameObject.SetActive(false);
         m_currentState = Define.MonsterState.Idle;
+
         m_isAttacking = false;
 
         if (_attack.Equals("SpecialAttack"))
         {
             m_canSpecialAttack = false;
 
-            yield return new WaitForSeconds(m_specialCoolTime);
+            yield return new WaitForSeconds(_coolTime);
             m_canSpecialAttack = true;
         }
+
     }
 
     void Move(Vector3 _moveDir, float _moveSpeed)
@@ -221,8 +229,9 @@ public class Slime : MonoBehaviour
     IEnumerator Hit(float _cooltime)
     {
         m_isHit = true;
-
+        
         yield return new WaitForSeconds(_cooltime);
+        
         m_isHit = false;
     }
 
@@ -251,7 +260,7 @@ public class Slime : MonoBehaviour
     void KnockBack(Vector3 _mosterVec)
     {
         Vector3 knockBackDir = new Vector3(_mosterVec.x, 0, 0).normalized;
-        knockBackDir += Vector3.up;
+        knockBackDir += Vector3.up * 2f;
 
         m_rigidbody.velocity = knockBackDir * m_knockBackPower;
         Util.LimitVelocity2D(m_rigidbody, Vector3.one * m_knockBackPower);
@@ -274,7 +283,7 @@ public class Slime : MonoBehaviour
     {
         if (collision.CompareTag("WeakAttack") || collision.CompareTag("StrongAttack"))
         {
-            Vector3 playerToMonsterVec = transform.position - collision.transform.position;
+            Vector3 playerToMonsterVec = transform.position - m_targetTransform.position;
 
             if (m_isHit == false && m_isDead == false)
             {
@@ -283,7 +292,10 @@ public class Slime : MonoBehaviour
                 m_life--;
 
                 if (m_life < 1)
+                {
+                    KnockBack(playerToMonsterVec);
                     MonsterState = Define.MonsterState.Die;
+                }   
                 else
                     MonsterState = Define.MonsterState.Hit;
             }
