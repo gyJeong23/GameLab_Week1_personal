@@ -32,6 +32,7 @@ public class PlayerController : BaseController
     public GameObject[] m_heartUIs;
     Collider2D m_collider2D;
     Transform m_invincibleState;
+    
 
     int m_life;
     int m_maxLlfe = 5;
@@ -41,7 +42,7 @@ public class PlayerController : BaseController
     float m_counterCoolTime = 0.8f;
     float m_dashCoolTime = 0.5f;
     float m_hitCoolTime = 1f;
-    float m_knockBackPower = 7f;
+    float m_knockBackPower = 5f;
     float m_dashPower = 2f;
     float m_jumpPower = 10;
 
@@ -65,6 +66,8 @@ public class PlayerController : BaseController
 
     protected override void Init()
     {
+       
+
         Util.SearchChild(transform, "sword").gameObject.SetActive(false);
 
         m_moveDir = Vector3.right;
@@ -296,6 +299,8 @@ public class PlayerController : BaseController
 
         yield return null;
         m_animator.SetBool("isDead", true);
+
+        GameScene.Instance.ActiveGameOverPanel(transform.position);
     }
 
     //private bool IsWall()

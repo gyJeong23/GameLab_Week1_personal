@@ -13,7 +13,11 @@ public class GameScene : BaseScene
 
     public Dictionary<int, Vector3> m_savePoints = new Dictionary<int, Vector3>();
 
+    public GameObject m_gameover;
+
     private int m_revivalCounter = 0;
+
+    private bool m_isGameOver;
 
     void Awake()
     {
@@ -25,12 +29,19 @@ public class GameScene : BaseScene
 
         Vector3 startPos = Vector3.zero;
         m_savePoints.Add(m_revivalCounter, startPos);
+
+
+        m_gameover = GameObject.Find("GameOver Panel");
+        m_gameover.SetActive(false);
     }
 
     public void Revival(GameObject _go)
     {
         if (m_savePoints == null)
             _go.transform.position = Vector3.zero;
+
+        if (m_gameover && Input.GetKey(KeyCode.R)) 
+            SceneManager.LoadScene(1);
 
         _go.transform.position = m_savePoints[m_revivalCounter];
     }
@@ -46,4 +57,12 @@ public class GameScene : BaseScene
         SceneManager.LoadScene(2);
     }
 
+    public void ActiveGameOverPanel(Vector3 _playerPos)
+    {
+        m_isGameOver = true;
+        m_gameover.SetActive(true);
+
+        m_gameover.transform.position = _playerPos;
+        Debug.Log(m_gameover.transform.position);
+    }
 }
