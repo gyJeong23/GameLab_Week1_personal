@@ -416,13 +416,13 @@ public class PlayerController : BaseController
                 m_heartUIs[m_life].SetActive(false);
 
             if (m_life < 1)
-            { 
+            {
                 ActionState = Define.PlayerState.Die;
                 m_collider2D.isTrigger = true;
                 m_rigidbody.bodyType = RigidbodyType2D.Static;
             }
-        }   
-        
+        }
+
         if (other.CompareTag(nameof(Define.TagName.SavePoint)))
         {
             GameScene.Instance.SaveRevivalPoint(other.transform.position);

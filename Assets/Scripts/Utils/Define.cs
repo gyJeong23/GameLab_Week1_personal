@@ -58,6 +58,7 @@ public class Define
         StrongAttack,
         Counter,
         Heart,
+        Clear,
     }
 
 }
