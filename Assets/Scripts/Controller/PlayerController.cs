@@ -43,7 +43,8 @@ public class PlayerController : BaseController
     float m_knockBackPower = 5f;
 
     bool m_hasWeapon;
-    bool m_hasdash;
+    bool m_hasJump;
+    bool m_hasDash;
     bool m_hasSpecialAttack;
     bool m_hasCounter;
     bool m_isCounter;
@@ -157,42 +158,37 @@ public class PlayerController : BaseController
         }
 
 
-        if (Input.GetKey(KeyCode.A) && IsDashing == false)
+        #region Player Move
+
+        if (Input.GetKey(KeyCode.LeftArrow) && IsDashing == false)
         {
             m_moveDir = Vector3.left;
             Move(m_moveDir, m_moveSpeed);
         }
-        if (Input.GetKey(KeyCode.D) && IsDashing == false)
+        if (Input.GetKey(KeyCode.RightArrow) && IsDashing == false)
         {
             m_moveDir = Vector3.right;
             Move(m_moveDir, m_moveSpeed);
         }
-        if (Input.GetKeyDown(KeyCode.W))
+        if (Input.GetKeyDown(KeyCode.UpArrow) && m_hasJump == true)
             Jump();
+        if (Input.GetKeyDown(KeyCode.LeftShift) && m_hasDash && IsDashing == false && IsAttacking == false)
+            ActionState = Define.PlayerState.Dash;
+
+        #endregion
 
         #region Player Action
 
-        if (IsAttacking == false /*&& Isdashing == false*/)
+        if (IsAttacking == false && m_hasWeapon == true)
         {
-            if (m_hasWeapon == true)
-            {
-                if (Input.GetKeyDown(KeyCode.J))
-                {
-                    ActionState = Define.PlayerState.DefualtAttack;
-                }
-                if (Input.GetKeyDown(KeyCode.K) && m_hasSpecialAttack)
-                {
-                    ActionState = Define.PlayerState.SpecialAttack;
-                }
-                if (Input.GetKeyDown(KeyCode.L) && m_hasCounter)
-                {
-                    ActionState = Define.PlayerState.Counter;
-                }
-            }
-            if (Input.GetKeyDown(KeyCode.LeftShift) && m_hasdash && IsDashing == false)
-            {
-                ActionState = Define.PlayerState.Dash;
-            }
+            if (Input.GetKeyDown(KeyCode.F))
+                ActionState = Define.PlayerState.DefualtAttack;
+            
+            if (Input.GetKeyDown(KeyCode.D) && m_hasSpecialAttack)
+                ActionState = Define.PlayerState.SpecialAttack;
+            
+            if (Input.GetKeyDown(KeyCode.S) && m_hasCounter)
+                ActionState = Define.PlayerState.Counter;
         }
 
         #endregion
@@ -310,8 +306,11 @@ public class PlayerController : BaseController
                         go.SetActive(true);
                     }
                     break;
+                case Define.ItemType.Jump:
+                    m_hasJump = true;
+                    break;
                 case Define.ItemType.Dash:
-                    m_hasdash = true;
+                    m_hasDash = true;
                     break;
                 case Define.ItemType.StrongAttack:
                     m_hasSpecialAttack = true;

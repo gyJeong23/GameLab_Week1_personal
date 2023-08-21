@@ -23,6 +23,7 @@ public class Define
         SpecialAttack,
         Hit,
         Die,
+        Dead,
     }
 
     public enum SceneType
@@ -48,6 +49,7 @@ public class Define
     { 
         Default,
         Weapon,
+        Jump,
         Dash,
         StrongAttack,
         Counter,

@@ -32,7 +32,7 @@ public class DropItem : MonoBehaviour
         if (collision.gameObject.CompareTag(nameof(Define.TagName.Ground)))
         {
             m_collider2D.isTrigger = true;
-            m_rigidbody2D.bodyType = RigidbodyType2D.Kinematic;
+            m_rigidbody2D.bodyType = RigidbodyType2D.Static;
         }
     }
 

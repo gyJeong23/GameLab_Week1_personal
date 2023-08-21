@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Unity.Burst.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -66,8 +67,17 @@ public class Slime : MonoBehaviour
                     break;
                 case Define.MonsterState.Die:
                     {
+                        m_isDead = true;
+                        DropItem();
+
                         m_animator.SetTrigger("onHit");
                         StartCoroutine(nameof(Die));
+                        MonsterState = Define.MonsterState.Dead;
+                    }
+                    break;
+                case Define.MonsterState.Dead:
+                    {
+                       
                     }
                     break;
             }
@@ -78,7 +88,9 @@ public class Slime : MonoBehaviour
     Transform m_targetTransform;
     Animator m_animator;
     Rigidbody2D m_rigidbody;
-    Vector3 m_moveDir = Vector3.right;
+    [SerializeField] GameObject m_dropItem;
+
+    Vector3 m_moveDir;
 
     [SerializeField] int m_life;
 
@@ -95,7 +107,7 @@ public class Slime : MonoBehaviour
     [SerializeField] float m_moveSpeed;
     [SerializeField] float m_knockBackPower;
 
-    bool m_isGround;
+    [SerializeField] bool m_isGround;
     bool m_isAttacking;
     bool m_canSpecialAttack = true;
     bool m_isHit;
@@ -114,6 +126,7 @@ public class Slime : MonoBehaviour
         TryGetComponent<Rigidbody2D>(out m_rigidbody);
 
         m_currentState = Define.MonsterState.Idle;
+        m_moveDir = Vector3.right;
         m_targetTransform = GameObject.FindWithTag("Player").transform;
 
     }
@@ -147,9 +160,10 @@ public class Slime : MonoBehaviour
                     MoveState();
                 }
                 break;
-            case Define.MonsterState.Die:
+            case Define.MonsterState.Dead:
                 {
-                    MonsterState = Define.MonsterState.Die;       
+                    Dead();
+                    MonsterState = Define.MonsterState.Dead;       
                 }
                 break;
         }
@@ -158,13 +172,17 @@ public class Slime : MonoBehaviour
     void FixedUpdate()
     {
         if (m_isGround == true)
-        {
-            Vector3 frontVec = transform.position + Vector3.right * m_moveDir.x;
-            Debug.DrawRay(frontVec, Vector3.down, new Color(0, 1, 0));
-            RaycastHit2D rayHit = Physics2D.Raycast(frontVec, Vector3.down, 1, LayerMask.GetMask("Ground"));
-            if (rayHit.collider == null)
-                m_moveDir *= -1f;
-        }
+            Turn();
+    }
+
+    private void Turn()
+    {
+        Vector3 frontVec = transform.position + Vector3.right * m_moveDir.x;
+        Debug.DrawRay(frontVec, Vector3.down, new Color(0, 1, 0));
+        RaycastHit2D rayHit = Physics2D.Raycast(frontVec, Vector3.down, 1, LayerMask.GetMask("Ground"));
+        
+        if (rayHit.collider == null)
+            m_moveDir *= -1f;
     }
 
     private void IdleState()
@@ -237,14 +255,26 @@ public class Slime : MonoBehaviour
 
     IEnumerator Die()
     {
-        m_isDead = true;
-
         yield return new WaitForSeconds(m_hitCoolTime / 2);
 
         m_animator.SetTrigger("onDie");
 
         yield return new WaitForSeconds(3f);
         Destroy(gameObject);
+    }
+
+    private void DropItem()
+    {
+        if (m_dropItem == null) return;
+        if (m_isDead == false) return;
+
+        GameObject dropItem = GameObject.Instantiate<GameObject>(m_dropItem);
+
+        dropItem.transform.position = transform.position;
+        dropItem.GetComponent<Rigidbody2D>().velocity = Vector3.up * 5f;
+
+        GameObject go = GameObject.Find("DropItems");
+        dropItem.transform.SetParent(go.transform);
     }
 
     void Dead()
@@ -268,14 +298,14 @@ public class Slime : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Ground"))
+        if (collision.gameObject.CompareTag("Ground") && m_isGround == false)
             m_isGround = true;
 
     }
 
     private void OnCollisionExit2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Ground"))
+        if (collision.gameObject.CompareTag("Ground") && m_isGround == true)
             m_isGround = false;
     }
 

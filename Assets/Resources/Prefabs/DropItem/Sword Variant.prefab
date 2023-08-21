@@ -690,7 +690,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1587750903349549892, guid: c5027624579d47445bbfb0db6ded068a, type: 3}
       propertyPath: m_Name
-      value: Sword
+      value: Sword Variant
       objectReference: {fileID: 0}
     - target: {fileID: 3226502635548094816, guid: c5027624579d47445bbfb0db6ded068a, type: 3}
       propertyPath: m_RootOrder
@@ -739,6 +739,30 @@ PrefabInstance:
     - target: {fileID: 3635740451030904092, guid: c5027624579d47445bbfb0db6ded068a, type: 3}
       propertyPath: m_itemType
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6065779519722177662, guid: c5027624579d47445bbfb0db6ded068a, type: 3}
+      propertyPath: m_RootOrder
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6741821494579620944, guid: c5027624579d47445bbfb0db6ded068a, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7936862291596399416, guid: c5027624579d47445bbfb0db6ded068a, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8843277707464617244, guid: c5027624579d47445bbfb0db6ded068a, type: 3}
+      propertyPath: m_RootOrder
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8941010738289106346, guid: c5027624579d47445bbfb0db6ded068a, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9052184357035353733, guid: c5027624579d47445bbfb0db6ded068a, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c5027624579d47445bbfb0db6ded068a, type: 3}

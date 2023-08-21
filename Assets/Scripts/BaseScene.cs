@@ -18,9 +18,5 @@ public class BaseScene : MonoBehaviour
         {
             go = new GameObject() { name = "@Scene" };
         }
-
     }
-
-
-
 }
