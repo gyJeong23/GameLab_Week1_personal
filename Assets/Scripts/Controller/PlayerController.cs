@@ -28,20 +28,21 @@ public class PlayerController : BaseController
 
     [SerializeField] Define.PlayerState m_playerActionState;
 
-    [SerializeField] float m_dashPower;
-    [SerializeField] float m_jumpPower;
 
     public GameObject[] m_heartUIs;
     Collider2D m_collider2D;
+    Transform m_invincibleState;
 
     int m_life = 5;
 
-    float m_defaultCoolTime = 0.2f;
-    float m_specialCoolTime = 0.8f;
+    float m_defaultCoolTime = 0.5f;
+    float m_specialCoolTime = 1.3f;
     float m_counterCoolTime = 0.8f;
     float m_dashCoolTime = 0.5f;
     float m_hitCoolTime = 1f;
-    float m_knockBackPower = 5f;
+    float m_knockBackPower = 7f;
+    float m_dashPower = 1.5f;
+    float m_jumpPower = 10;
 
     bool m_hasWeapon;
     bool m_hasJump;
@@ -67,17 +68,37 @@ public class PlayerController : BaseController
 
         m_moveDir = Vector3.right;
         TryGetComponent<Collider2D>(out m_collider2D);
+
+        m_invincibleState = Util.SearchChild(transform, "Invincible State");
+
+        m_invincibleState.gameObject.SetActive(false);
+
     }
 
     protected override void OnUpdate()
     {
-        if (m_isDead)
-            Dead();
 
         OnKeyboard();
 
-        if (IsDashing == true)
+        if (IsDashing)
             Dash(m_moveDir, MoveSpeed);
+
+        if (IsGround && m_isDead)
+        {
+            m_collider2D.isTrigger = true;
+            m_rigidbody.bodyType = RigidbodyType2D.Static;
+        }
+
+        InvincibleState();
+
+    }
+
+    void InvincibleState()
+    {
+        if (m_isHit)
+            m_invincibleState.gameObject.SetActive(true);
+        else
+            m_invincibleState.gameObject.SetActive(false);
     }
 
     protected override void Move(Vector3 _moveDir, float _moveSpeed)
@@ -161,12 +182,12 @@ public class PlayerController : BaseController
 
         #region Player Move
 
-        if (Input.GetKey(KeyCode.LeftArrow) && IsDashing == false)
+        if (Input.GetKey(KeyCode.LeftArrow) && !IsDashing && !IsWall())
         {
             m_moveDir = Vector3.left;
             Move(m_moveDir, m_moveSpeed);
         }
-        if (Input.GetKey(KeyCode.RightArrow) && IsDashing == false)
+        if (Input.GetKey(KeyCode.RightArrow) && !IsDashing && !IsWall())
         {
             m_moveDir = Vector3.right;
             Move(m_moveDir, m_moveSpeed);
@@ -258,13 +279,13 @@ public class PlayerController : BaseController
         m_isHit = false;
     }
 
-    void KnockBack(Vector3 _mosterVec)
+    void KnockBack(Vector3 _mosterVec, float _knockBackPower)
     {
         Vector3 knockBackDir = new Vector3(_mosterVec.x, 0, 0).normalized;
         knockBackDir += Vector3.up;
 
-        m_rigidbody.velocity = knockBackDir * m_knockBackPower;
-        Util.LimitVelocity2D(m_rigidbody, Vector3.one * m_knockBackPower);
+        m_rigidbody.velocity = knockBackDir * _knockBackPower;
+        Util.LimitVelocity2D(m_rigidbody, Vector3.one * _knockBackPower);
     }
 
     IEnumerator Die()
@@ -275,17 +296,20 @@ public class PlayerController : BaseController
         m_animator.SetBool("isDead", true);
     }
 
-    void Dead()
+    private bool IsWall()
     {
-        
-        m_collider2D.isTrigger = true;
+        Vector3 frontVec = transform.position + Vector3.right * 0.5f * m_moveDir.x + Vector3.up;
+        Debug.DrawRay(frontVec, m_moveDir, new Color(0, 1, 0));
+        RaycastHit2D rayHit = Physics2D.Raycast(frontVec, m_moveDir, 1, LayerMask.GetMask("Ground"));
 
-        if (IsGround)
-            m_rigidbody.bodyType = RigidbodyType2D.Static;
+        if (rayHit.collider != null)
+            return true;
+        else return false;
+
     }
 
     #region Trigger/Collision
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void OnCollisionStay2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
             IsGround = true;
@@ -329,8 +353,10 @@ public class PlayerController : BaseController
             Destroy(other.gameObject);
         }
 
-        if (other.CompareTag(nameof(Define.TagName.MonsterAttack)) && m_isDead == false)
+        if (other.CompareTag(nameof(Define.TagName.MonsterAttack)) || other.CompareTag(nameof(Define.TagName.StrongAttack)))
         {
+            if (m_isDead) return;
+
             Vector3 monsterToPlayerVec = transform.position - other.transform.position;
 
             //if (m_isCounter == true) // 수정 필요
@@ -349,7 +375,10 @@ public class PlayerController : BaseController
             //else 
             if (m_isHit == false)
             {
-                KnockBack(monsterToPlayerVec);
+                if (other.CompareTag(nameof(Define.TagName.StrongAttack)))
+                    KnockBack(monsterToPlayerVec, m_knockBackPower * 1.5f);
+                else
+                    KnockBack(monsterToPlayerVec, m_knockBackPower);
 
                 m_life--;
                 if (m_life >= 0)
@@ -376,15 +405,19 @@ public class PlayerController : BaseController
                 m_collider2D.isTrigger = true;
                 m_rigidbody.bodyType = RigidbodyType2D.Static;
             }
-
-
-
         }   
 
         if (other.CompareTag(nameof(Define.TagName.SavePoint)))
         {
             GameScene.Instance.SaveRevivalPoint(other.transform.position);
             other.gameObject.SetActive(false);
+
+            foreach (GameObject hearUI in m_heartUIs)
+            {
+                hearUI.SetActive(false);
+                hearUI.SetActive(true);
+            }    
+
         }
 
     }

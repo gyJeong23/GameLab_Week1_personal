@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 using Unity.Burst.CompilerServices;
 using UnityEngine;
 
@@ -81,6 +82,7 @@ public abstract class BaseMonster : MonoBehaviour
     protected Transform m_targetTransform;
     protected Animator m_animator;
     protected Rigidbody2D m_rigidbody;
+    protected Transform m_invincibleState;
 
     protected Vector3 m_moveDir;
 
@@ -121,9 +123,12 @@ public abstract class BaseMonster : MonoBehaviour
         m_currentState = Define.MonsterState.Idle;
         m_moveDir = Vector3.right;
         m_targetTransform = GameObject.FindWithTag("Player").transform;
+        m_invincibleState = Util.SearchChild(transform, "Invincible State");
 
+        m_invincibleState.gameObject.SetActive(false);
         Util.SearchChild(transform, "DefaultAttack").gameObject.SetActive(false);
         Util.SearchChild(transform, "SpecialAttack").gameObject.SetActive(false);
+
     }
 
     protected void Update()
@@ -160,25 +165,53 @@ public abstract class BaseMonster : MonoBehaviour
                 break;
         }
         #endregion
+
+        InvincibleState();
     }
     protected void FixedUpdate()
     {
+        
+
         if (m_isGround == true)
-            Turn();
+        {
+            bool isWall = IsWall();
+            bool isGround = IsGround();
+
+            if (isWall == true || isGround == false)
+                m_moveDir *= -1;
+
+        }    
     }
 
-    protected void Turn()
+    protected bool IsGround()
     {
         Vector3 frontVec = transform.position + Vector3.right * m_moveDir.x;
         Debug.DrawRay(frontVec, Vector3.down, new Color(0, 1, 0));
         RaycastHit2D rayHit = Physics2D.Raycast(frontVec, Vector3.down, 1, LayerMask.GetMask("Ground"));
 
-        if (rayHit.collider == null)
-        { 
-            m_rigidbody.velocity = Vector3.zero;
-            m_moveDir *= -1f;
-        }
+        if (rayHit.collider != null)
+            return true;
+        else return false;
+    }
 
+    protected bool IsWall()
+    {
+        Vector3 frontVec = transform.position + Vector3.right * m_moveDir.x + Vector3.up;
+        Debug.DrawRay(frontVec, m_moveDir, new Color(0, 1, 0));
+        RaycastHit2D rayHit = Physics2D.Raycast(frontVec, m_moveDir, 1, LayerMask.GetMask("Ground"));
+
+        if (rayHit.collider != null)
+            return true;
+        else return false;
+
+    }
+
+    void InvincibleState()
+    {
+        if (m_isHit)
+            m_invincibleState.gameObject.SetActive(true);
+        else
+            m_invincibleState.gameObject.SetActive(false);
     }
 
     protected void IdleState()
@@ -288,16 +321,16 @@ public abstract class BaseMonster : MonoBehaviour
         dropItem.transform.SetParent(go.transform);
     }
 
-    protected void KnockBack(Vector3 _mosterVec)
+    protected void KnockBack(Vector3 _mosterVec, float _knockBackPower)
     {
         Vector3 knockBackDir = new Vector3(_mosterVec.x, 0, 0).normalized;
         knockBackDir += Vector3.up * 3f;
 
-        m_rigidbody.velocity = knockBackDir * m_knockBackPower;
-        Util.LimitVelocity2D(m_rigidbody, Vector3.one * m_knockBackPower);
+        m_rigidbody.velocity = knockBackDir * _knockBackPower;
+        Util.LimitVelocity2D(m_rigidbody, Vector3.one * _knockBackPower);
     }
 
-    protected void OnCollisionEnter2D(Collision2D collision)
+    protected void OnCollisionStay2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Ground") && m_isGround == false)
             m_isGround = true;
@@ -314,22 +347,27 @@ public abstract class BaseMonster : MonoBehaviour
     {
         if (collision.CompareTag("WeakAttack") || collision.CompareTag("StrongAttack"))
         {
+            if (m_isDead) return;
+            if (m_isHit) return;
+
             Vector3 playerToMonsterVec = transform.position - m_targetTransform.position;
 
-            if (m_isHit == false && m_isDead == false)
+
+            if (collision.CompareTag("StrongAttack"))
+                KnockBack(playerToMonsterVec, m_knockBackPower * 1.5f);
+            else
+                KnockBack(playerToMonsterVec, m_knockBackPower);
+
+
+            m_life--;
+
+            if (m_life < 1)
             {
-                KnockBack(playerToMonsterVec);
-
-                m_life--;
-
-                if (m_life < 1)
-                {
-                    KnockBack(playerToMonsterVec);
-                    MonsterState = Define.MonsterState.Die;
-                }
-                else
-                    MonsterState = Define.MonsterState.Hit;
+                MonsterState = Define.MonsterState.Die;
             }
+            else
+                MonsterState = Define.MonsterState.Hit;
+
         }
     }
 

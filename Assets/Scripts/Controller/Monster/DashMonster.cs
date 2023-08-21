@@ -14,7 +14,7 @@ public class DashMonster : BaseMonster
         m_thinkTime = 1f;
         m_defaultCoolTime = 1;
         m_specialCoolTime = 3;
-        m_hitCoolTime = 1;
+        m_hitCoolTime = 1.3f;
 
         m_detectRange = 15;
         m_defaultAttackRange = 2;

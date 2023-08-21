@@ -14,7 +14,7 @@ public class MobPlayer : BaseMonster
         m_thinkTime = 1f;
         m_defaultCoolTime = 1;
         m_specialCoolTime = 5;
-        m_hitCoolTime = 1;
+        m_hitCoolTime = 2;
 
         m_detectRange = 10;
         m_defaultAttackRange = 4;

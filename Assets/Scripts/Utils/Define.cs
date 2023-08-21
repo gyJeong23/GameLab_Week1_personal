@@ -13,6 +13,7 @@ public class Define
         Dash,
         Hit,
         Die,
+        Dead,
     }
 
     public enum MonsterState
