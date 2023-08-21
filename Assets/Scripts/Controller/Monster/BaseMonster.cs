@@ -43,6 +43,9 @@ public abstract class BaseMonster : MonoBehaviour
                     break;
                 case Define.MonsterState.SpecialAttack:
                     {
+                        if (m_canSpecialAttack == false)
+                            MonsterState = Define.MonsterState.Move;
+
                         m_animator.SetTrigger("onSpecialAttack");
                         StartCoroutine(AttackState("SpecialAttack", m_specialCoolTime));
                         m_canSpecialAttack = false;
@@ -85,7 +88,7 @@ public abstract class BaseMonster : MonoBehaviour
     protected float m_targetDistance;
 
     protected bool m_isGround;
-    protected bool m_isAttacking;
+   [SerializeField] protected bool m_isAttacking;
     protected bool m_canSpecialAttack = true;
     protected bool m_isHit;
     protected bool m_isDead;
@@ -118,6 +121,9 @@ public abstract class BaseMonster : MonoBehaviour
         m_currentState = Define.MonsterState.Idle;
         m_moveDir = Vector3.right;
         m_targetTransform = GameObject.FindWithTag("Player").transform;
+
+        Util.SearchChild(transform, "DefaultAttack").gameObject.SetActive(false);
+        Util.SearchChild(transform, "SpecialAttack").gameObject.SetActive(false);
     }
 
     protected void Update()
@@ -188,7 +194,7 @@ public abstract class BaseMonster : MonoBehaviour
     {
         if (m_isAttacking == false)
         {
-            if (m_targetDistance < m_specialAttackRange && m_canSpecialAttack)
+            if (m_targetDistance < m_specialAttackRange && m_canSpecialAttack == true)
                 m_currentState = Define.MonsterState.SpecialAttack;
             else if (m_targetDistance < m_defaultAttackRange)
                 m_currentState = Define.MonsterState.DefualtAttack;
@@ -206,10 +212,10 @@ public abstract class BaseMonster : MonoBehaviour
 
     protected virtual IEnumerator AttackState(string _attack, float _coolTime)
     {
-        if (m_isAttacking) 
+        if (m_isAttacking)
         {
             m_currentState = Define.MonsterState.Move;
-            yield break; 
+            yield break;
         }
 
         m_isAttacking = true;
@@ -222,7 +228,6 @@ public abstract class BaseMonster : MonoBehaviour
         attackTrigger.gameObject.SetActive(false);
         m_isAttacking = false;
 
-
         if (_attack.Equals("SpecialAttack"))
         {
             m_canSpecialAttack = false;
@@ -231,9 +236,7 @@ public abstract class BaseMonster : MonoBehaviour
             m_canSpecialAttack = true;
         }
 
-        
         m_currentState = Define.MonsterState.Move;
-
     }
 
     protected void Move(Vector3 _moveDir, float _moveSpeed)
@@ -288,7 +291,7 @@ public abstract class BaseMonster : MonoBehaviour
     protected void KnockBack(Vector3 _mosterVec)
     {
         Vector3 knockBackDir = new Vector3(_mosterVec.x, 0, 0).normalized;
-        knockBackDir += Vector3.up * 2f;
+        knockBackDir += Vector3.up * 3f;
 
         m_rigidbody.velocity = knockBackDir * m_knockBackPower;
         Util.LimitVelocity2D(m_rigidbody, Vector3.one * m_knockBackPower);

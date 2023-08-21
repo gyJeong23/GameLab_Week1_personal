@@ -39,7 +39,7 @@ public class DashMonster : BaseMonster
         {
             m_rigidbody.velocity = Vector3.zero;
 
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(0.1f);
             m_rigidbody.velocity = m_moveDir * m_moveSpeed * 5;
         }
 
@@ -49,6 +49,7 @@ public class DashMonster : BaseMonster
 
         yield return new WaitForSeconds(curAnimationTime);
         attackTrigger.gameObject.SetActive(false);
+
         m_isAttacking = false;
 
         if (_attack.Equals("SpecialAttack"))
