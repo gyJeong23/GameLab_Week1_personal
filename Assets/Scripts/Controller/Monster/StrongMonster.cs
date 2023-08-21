@@ -18,13 +18,13 @@ public class StrongMonster : BaseMonster
         
         m_thinkTime = 1f;
         m_defaultCoolTime = 1;
-        m_specialCoolTime = 5;
+        m_specialCoolTime = 4;
         m_hitCoolTime = 1.5f;
         
         m_detectRange = 10;
         m_defaultAttackRange = 4;
-        m_specialAttackRange = 6;
-        m_moveSpeed = 5;
+        m_specialAttackRange = 8;
+        m_moveSpeed = 4;
         m_knockBackPower = 3;
         #endregion 
     }

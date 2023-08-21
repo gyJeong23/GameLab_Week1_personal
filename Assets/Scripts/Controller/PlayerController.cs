@@ -50,7 +50,7 @@ public class PlayerController : BaseController
     bool m_hasDash;
     bool m_hasSpecialAttack;
     bool m_hasCounter;
-    bool m_isCounter;
+    //bool m_isCounter;
     bool m_isHit;
     bool m_isDead;
 
@@ -239,19 +239,19 @@ public class PlayerController : BaseController
         IsAttacking = false;
     }
 
-    IEnumerator Counter(string _counter, float _coolTime)
-    {
-        m_isCounter = true;
+    //IEnumerator Counter(string _counter, float _coolTime)
+    //{
+    //    m_isCounter = true;
 
-        Transform counterTrigger = Util.SearchChild(transform, _counter);
-        counterTrigger.gameObject.SetActive(true);
+    //    Transform counterTrigger = Util.SearchChild(transform, _counter);
+    //    counterTrigger.gameObject.SetActive(true);
 
-        yield return new WaitForSeconds(_coolTime);
-        counterTrigger.gameObject.SetActive(false);
+    //    yield return new WaitForSeconds(_coolTime);
+    //    counterTrigger.gameObject.SetActive(false);
 
-        ActionState = Define.PlayerState.Idle;
-        m_isCounter = false;
-    }
+    //    ActionState = Define.PlayerState.Idle;
+    //    m_isCounter = false;
+    //}
 
     void Jump()
     {
@@ -284,10 +284,10 @@ public class PlayerController : BaseController
     void KnockBack(Vector3 _mosterVec, float _knockBackPower)
     {
         Vector3 knockBackDir = new Vector3(_mosterVec.x, 0, 0).normalized;
-        knockBackDir += Vector3.up;
+        knockBackDir += Vector3.up * 2;
 
         m_rigidbody.velocity = knockBackDir * _knockBackPower;
-        Util.LimitVelocity2D(m_rigidbody, Vector3.one * _knockBackPower);
+        //Util.LimitVelocity2D(m_rigidbody, Vector3.one * _knockBackPower);
     }
 
     IEnumerator Die()
@@ -309,6 +309,17 @@ public class PlayerController : BaseController
     //    else return false;
 
     //}
+
+    void Treat()
+    {
+        foreach (GameObject hearUI in m_heartUIs)
+        {
+            hearUI.SetActive(false);
+            hearUI.SetActive(true);
+        }
+        m_life = m_maxLlfe;
+    }
+
 
     #region Trigger/Collision
     private void OnCollisionStay2D(Collision2D collision)
@@ -350,6 +361,9 @@ public class PlayerController : BaseController
                 case Define.ItemType.Counter:
                     m_hasCounter = true;
                     break;
+                case Define.ItemType.Heart:
+                    Treat();
+                    break;
             }
 
             Destroy(other.gameObject);
@@ -378,7 +392,7 @@ public class PlayerController : BaseController
             if (m_isHit == false)
             {
                 if (other.CompareTag(nameof(Define.TagName.StrongAttack)))
-                    KnockBack(monsterToPlayerVec, m_knockBackPower * 1.5f);
+                    KnockBack(monsterToPlayerVec, m_knockBackPower * 2f);
                 else
                     KnockBack(monsterToPlayerVec, m_knockBackPower);
 
@@ -414,12 +428,7 @@ public class PlayerController : BaseController
             GameScene.Instance.SaveRevivalPoint(other.transform.position);
             other.gameObject.SetActive(false);
 
-            foreach (GameObject hearUI in m_heartUIs)
-            {
-                hearUI.SetActive(false);
-                hearUI.SetActive(true);
-            }
-            m_life = m_maxLlfe;
+            Treat();
         }
     }
     

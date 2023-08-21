@@ -38,6 +38,11 @@ public class DashMonster : BaseMonster
             yield break;
         }
 
+        if (_attack.Equals("SpecialAttack"))
+            m_animator.SetTrigger("onSpecialAttack");
+        else
+            m_animator.SetTrigger("onDefaultAttack");
+
         m_isAttacking = true;
 
         // Dash Special
@@ -55,7 +60,6 @@ public class DashMonster : BaseMonster
 
         yield return new WaitForSeconds(curAnimationTime);
         attackTrigger.gameObject.SetActive(false);
-
         m_isAttacking = false;
 
         if (_attack.Equals("SpecialAttack"))
@@ -66,8 +70,6 @@ public class DashMonster : BaseMonster
             m_canSpecialAttack = true;
         }
 
-        
         m_currentState = Define.MonsterState.Move;
-
     }
 }

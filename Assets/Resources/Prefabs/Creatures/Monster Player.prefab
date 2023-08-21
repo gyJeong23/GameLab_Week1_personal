@@ -189,7 +189,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1982820089658031236, guid: 268ae7a8d28032c4eb481fff48fc0a06, type: 3}
       propertyPath: m_TagString
-      value: MonsterAttack
+      value: MonsterStrongAttack
       objectReference: {fileID: 0}
     - target: {fileID: 2111562452668174251, guid: 268ae7a8d28032c4eb481fff48fc0a06, type: 3}
       propertyPath: m_Layer
@@ -619,5 +619,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_currentState: 0
   m_mosterState: 0
+  m_isGround: 0
   m_isAttacking: 0
   m_dropItem: {fileID: 0}

@@ -23,7 +23,7 @@ public abstract class BaseMonster : MonoBehaviour
             {
                 case Define.MonsterState.Idle:
                     {
-                        m_animator.CrossFade("Idle", 0.1f);
+                        m_animator.Play("Idle");
                         int randomDir = UnityEngine.Random.Range(0, 2);
                         randomDir = (randomDir == 1 ? 1 : -1);
 
@@ -32,12 +32,11 @@ public abstract class BaseMonster : MonoBehaviour
                     break;
                 case Define.MonsterState.Move:
                     {
-                        m_animator.CrossFade("Move", 0.1f);
+                        m_animator.Play("Move");
                     }
                     break;
                 case Define.MonsterState.DefualtAttack:
                     {
-                        m_animator.SetTrigger("onDefaultAttack");
                         StartCoroutine(AttackState("DefaultAttack", m_defaultCoolTime));
 
                     }
@@ -47,7 +46,6 @@ public abstract class BaseMonster : MonoBehaviour
                         if (m_canSpecialAttack == false)
                             MonsterState = Define.MonsterState.Move;
 
-                        m_animator.SetTrigger("onSpecialAttack");
                         StartCoroutine(AttackState("SpecialAttack", m_specialCoolTime));
                         m_canSpecialAttack = false;
                     }
@@ -89,8 +87,8 @@ public abstract class BaseMonster : MonoBehaviour
     protected float m_thinkTimeCounter;
     protected float m_targetDistance;
 
-    protected bool m_isGround;
-   [SerializeField] protected bool m_isAttacking;
+    [SerializeField] protected bool m_isGround;
+    [SerializeField] protected bool m_isAttacking;
     protected bool m_canSpecialAttack = true;
     protected bool m_isHit;
     protected bool m_isDead;
@@ -257,6 +255,11 @@ public abstract class BaseMonster : MonoBehaviour
             yield break;
         }
 
+        if (_attack.Equals("SpecialAttack"))
+            m_animator.SetTrigger("onSpecialAttack");
+        else
+            m_animator.SetTrigger("onDefaultAttack");
+
         m_isAttacking = true;
 
         Transform attackTrigger = Util.SearchChild(transform, _attack);
@@ -318,6 +321,10 @@ public abstract class BaseMonster : MonoBehaviour
         if (m_dropItem == null) return;
         if (m_isDead == false) return;
 
+        bool isHeart = (m_dropItem.GetComponent<DropItem>().m_itemType == Define.ItemType.Heart);
+        if (isHeart && (Random.Range(0, 2) > 0))
+            return;
+
         GameObject dropItem = GameObject.Instantiate<GameObject>(m_dropItem);
 
         dropItem.transform.position = transform.position;
@@ -363,7 +370,6 @@ public abstract class BaseMonster : MonoBehaviour
                 KnockBack(playerToMonsterVec, m_knockBackPower * 1.5f);
             else
                 KnockBack(playerToMonsterVec, m_knockBackPower);
-
 
             m_life--;
 

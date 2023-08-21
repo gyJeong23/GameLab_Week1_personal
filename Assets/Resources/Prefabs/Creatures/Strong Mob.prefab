@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 3548428900633654287}
   m_Layer: 8
   m_Name: SpecialAttack
-  m_TagString: StrongAttack
+  m_TagString: MonsterStrongAttack
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -728,6 +728,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_currentState: 0
   m_mosterState: 0
+  m_isGround: 0
   m_isAttacking: 0
   m_dropItem: {fileID: 6987649995723412773, guid: be5b676980175f74389a03435b93f624, type: 3}
 --- !u!1 &7127584557353034809
