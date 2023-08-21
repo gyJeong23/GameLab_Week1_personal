@@ -20,7 +20,7 @@ public class MobPlayer : BaseMonster
         m_defaultAttackRange = 4;
         m_specialAttackRange = 8;
         m_moveSpeed = 6;
-        m_knockBackPower = 7;
+        m_knockBackPower = 5;
         #endregion 
     }
 }

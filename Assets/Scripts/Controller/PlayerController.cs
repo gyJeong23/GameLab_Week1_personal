@@ -176,6 +176,13 @@ public class PlayerController : BaseController
         if (Input.GetKeyDown(KeyCode.LeftShift) && m_hasDash && IsDashing == false && IsAttacking == false)
             ActionState = Define.PlayerState.Dash;
 
+
+        //Temp
+        if (Input.GetKey(KeyCode.R))
+        {
+            SceneManager.LoadScene(0);
+        }
+
         #endregion
 
         #region Player Action

@@ -38,7 +38,6 @@ public abstract class BaseMonster : MonoBehaviour
                     {
                         m_animator.SetTrigger("onDefaultAttack");
                         StartCoroutine(AttackState("DefaultAttack", m_defaultCoolTime));
-                        m_currentState = Define.MonsterState.Move;
 
                     }
                     break;
@@ -47,8 +46,6 @@ public abstract class BaseMonster : MonoBehaviour
                         m_animator.SetTrigger("onSpecialAttack");
                         StartCoroutine(AttackState("SpecialAttack", m_specialCoolTime));
                         m_canSpecialAttack = false;
-
-                        m_currentState = Define.MonsterState.Move;
                     }
                     break;
                 case Define.MonsterState.Hit:
@@ -171,7 +168,11 @@ public abstract class BaseMonster : MonoBehaviour
         RaycastHit2D rayHit = Physics2D.Raycast(frontVec, Vector3.down, 1, LayerMask.GetMask("Ground"));
 
         if (rayHit.collider == null)
+        { 
+            m_rigidbody.velocity = Vector3.zero;
             m_moveDir *= -1f;
+        }
+
     }
 
     protected void IdleState()
@@ -203,8 +204,14 @@ public abstract class BaseMonster : MonoBehaviour
     }
 
 
-    protected IEnumerator AttackState(string _attack, float _coolTime)
+    protected virtual IEnumerator AttackState(string _attack, float _coolTime)
     {
+        if (m_isAttacking) 
+        {
+            m_currentState = Define.MonsterState.Move;
+            yield break; 
+        }
+
         m_isAttacking = true;
 
         Transform attackTrigger = Util.SearchChild(transform, _attack);
@@ -213,9 +220,8 @@ public abstract class BaseMonster : MonoBehaviour
 
         yield return new WaitForSeconds(curAnimationTime);
         attackTrigger.gameObject.SetActive(false);
-        m_currentState = Define.MonsterState.Idle;
-
         m_isAttacking = false;
+
 
         if (_attack.Equals("SpecialAttack"))
         {
@@ -224,10 +230,16 @@ public abstract class BaseMonster : MonoBehaviour
             yield return new WaitForSeconds(_coolTime);
             m_canSpecialAttack = true;
         }
+
+        
+        m_currentState = Define.MonsterState.Move;
+
     }
 
     protected void Move(Vector3 _moveDir, float _moveSpeed)
     {
+        if (m_isAttacking) return;
+
         transform.position += _moveDir * _moveSpeed * Time.deltaTime;
         transform.localScale = new Vector3(_moveDir.x, 1, 1);
     }
