@@ -31,7 +31,8 @@ public class Define
     {
         UnKnown,
         GameScene,
-        MeneScene,
+        StartScene,
+        ClearScene,
     }
 
     public enum TagName

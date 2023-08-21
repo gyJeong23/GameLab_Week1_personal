@@ -1,17 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameScene : BaseScene
 {
     private static GameScene s_instance;
-    public static GameScene Instance 
+    public static GameScene Instance
     {
         get { return s_instance; }
     }
 
     public Dictionary<int, Vector3> m_savePoints = new Dictionary<int, Vector3>();
-    
+
     private int m_revivalCounter = 0;
 
     void Awake()
@@ -23,7 +24,7 @@ public class GameScene : BaseScene
         SceneType = Define.SceneType.GameScene;
 
         Vector3 startPos = Vector3.zero;
-        m_savePoints.Add(m_revivalCounter,startPos);
+        m_savePoints.Add(m_revivalCounter, startPos);
     }
 
     public void Revival(GameObject _go)
@@ -38,6 +39,11 @@ public class GameScene : BaseScene
     {
         Vector3 newPoint = _revivalPos;
         m_savePoints.Add(++m_revivalCounter, newPoint);
+    }
+
+    public void LoadClearScene()
+    {
+        SceneManager.LoadScene(2);
     }
 
 }

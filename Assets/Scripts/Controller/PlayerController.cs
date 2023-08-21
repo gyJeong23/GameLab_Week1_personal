@@ -364,6 +364,9 @@ public class PlayerController : BaseController
                 case Define.ItemType.Heart:
                     Treat();
                     break;
+                case Define.ItemType.Clear:
+                    GameScene.Instance.LoadClearScene();
+                    break;
             }
 
             Destroy(other.gameObject);
