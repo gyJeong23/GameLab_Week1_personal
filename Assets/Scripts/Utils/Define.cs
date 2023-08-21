@@ -25,6 +25,13 @@ public class Define
         Die,
     }
 
+    public enum SceneType
+    {
+        UnKnown,
+        GameScene,
+        MeneScene,
+    }
+
     public enum TagName
     {
         Default,
