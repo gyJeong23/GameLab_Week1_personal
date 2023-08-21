@@ -141,8 +141,6 @@ public class Slime : MonoBehaviour
         {
             m_thinkTimeCounter = 0;
             MonsterState = m_currentState;
-
-            Debug.Log($"{gameObject.name} : {MonsterState}");
         }
         else
             m_thinkTimeCounter += Time.deltaTime;

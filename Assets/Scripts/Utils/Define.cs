@@ -43,6 +43,8 @@ public class Define
         DropItem,
         Monster,
         MonsterAttack,
+        DeadLine,
+        SavePoint
     }
 
     public enum ItemType

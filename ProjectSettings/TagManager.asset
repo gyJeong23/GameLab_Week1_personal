@@ -12,6 +12,7 @@ TagManager:
   - DropItem
   - Monster
   - MonsterAttack
+  - SavePoint
   layers:
   - Default
   - TransparentFX

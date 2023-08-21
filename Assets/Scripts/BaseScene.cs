@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class BaseScene : MonoBehaviour
 {
@@ -17,6 +18,14 @@ public class BaseScene : MonoBehaviour
         if (go == null)
         {
             go = new GameObject() { name = "@Scene" };
+        }
+
+        GameObject eventSystem = GameObject.Find("EventSystem");
+        if (eventSystem == null)
+        {
+            eventSystem = new GameObject() { name = "EventSystem" };
+            eventSystem.AddComponent<EventSystem>();
+            eventSystem.AddComponent<StandaloneInputModule>();
         }
     }
 }

@@ -32,6 +32,7 @@ public class PlayerController : BaseController
     [SerializeField] float m_jumpPower;
 
     public GameObject[] m_heartUIs;
+    Collider2D m_collider2D;
 
     int m_life = 5;
 
@@ -65,6 +66,7 @@ public class PlayerController : BaseController
         Util.SearchChild(transform, "sword").gameObject.SetActive(false);
 
         m_moveDir = Vector3.right;
+        TryGetComponent<Collider2D>(out m_collider2D);
     }
 
     protected override void OnUpdate()
@@ -134,7 +136,6 @@ public class PlayerController : BaseController
                     break;
                 case Define.PlayerState.Die:
                     {
-                        m_animator.CrossFade("Hit", 0.1f);
                         StartCoroutine(nameof(Die));
                     }
                     break;
@@ -263,16 +264,14 @@ public class PlayerController : BaseController
     {
         m_isDead = true;
 
-        yield return new WaitForSeconds(m_hitCoolTime / 2);
-
+        yield return null;
         m_animator.SetBool("isDead", true);
     }
 
     void Dead()
     {
-        CircleCollider2D playerCollider;
-        TryGetComponent<CircleCollider2D>(out playerCollider);
-        playerCollider.isTrigger = true;
+        
+        m_collider2D.isTrigger = true;
 
         if (IsGround)
             m_rigidbody.bodyType = RigidbodyType2D.Static;
@@ -355,7 +354,34 @@ public class PlayerController : BaseController
                     ActionState = Define.PlayerState.Hit;
             }
         }
+
+        if (other.CompareTag(nameof(Define.TagName.DeadLine)))
+        {
+            GameScene.Instance.Revival(gameObject);
+
+            m_life--;
+            if (m_life >= 0)
+                m_heartUIs[m_life].SetActive(false);
+
+            if (m_life < 1)
+            { 
+                ActionState = Define.PlayerState.Die;
+                m_collider2D.isTrigger = true;
+                m_rigidbody.bodyType = RigidbodyType2D.Static;
+            }
+
+
+
+        }   
+
+        if (other.CompareTag(nameof(Define.TagName.SavePoint)))
+        {
+            GameScene.Instance.SaveRevivalPoint(other.transform.position);
+            other.gameObject.SetActive(false);
+        }
+
     }
+    
     #endregion
 
 }
