@@ -14,7 +14,7 @@ public class Slime : BaseMonster
         base.Start();
 
         #region monster status
-        m_life = 3;
+        m_life = 2;
         
         m_thinkTime = 1;
         m_defaultCoolTime = 1;

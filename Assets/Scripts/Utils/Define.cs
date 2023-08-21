@@ -44,6 +44,7 @@ public class Define
         DropItem,
         Monster,
         MonsterAttack,
+        MonsterStrongAttack,
         DeadLine,
         SavePoint
     }
@@ -56,6 +57,7 @@ public class Define
         Dash,
         StrongAttack,
         Counter,
+        Heart,
     }
 
 }

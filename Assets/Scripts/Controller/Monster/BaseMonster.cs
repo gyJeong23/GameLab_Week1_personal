@@ -251,6 +251,12 @@ public abstract class BaseMonster : MonoBehaviour
             yield break;
         }
 
+        if (_attack.Equals("SpecialAttack") && m_canSpecialAttack == false)
+        {
+            m_currentState = Define.MonsterState.Move;
+            yield break;
+        }
+
         m_isAttacking = true;
 
         Transform attackTrigger = Util.SearchChild(transform, _attack);

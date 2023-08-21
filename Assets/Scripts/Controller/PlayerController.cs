@@ -33,7 +33,8 @@ public class PlayerController : BaseController
     Collider2D m_collider2D;
     Transform m_invincibleState;
 
-    int m_life = 5;
+    int m_life;
+    int m_maxLlfe = 5;
 
     float m_defaultCoolTime = 0.5f;
     float m_specialCoolTime = 1.3f;
@@ -41,7 +42,7 @@ public class PlayerController : BaseController
     float m_dashCoolTime = 0.5f;
     float m_hitCoolTime = 1f;
     float m_knockBackPower = 7f;
-    float m_dashPower = 1.5f;
+    float m_dashPower = 2f;
     float m_jumpPower = 10;
 
     bool m_hasWeapon;
@@ -73,6 +74,7 @@ public class PlayerController : BaseController
 
         m_invincibleState.gameObject.SetActive(false);
 
+        m_life = m_maxLlfe;
     }
 
     protected override void OnUpdate()
@@ -182,12 +184,12 @@ public class PlayerController : BaseController
 
         #region Player Move
 
-        if (Input.GetKey(KeyCode.LeftArrow) && !IsDashing && !IsWall())
+        if (Input.GetKey(KeyCode.LeftArrow) && !IsDashing/* && !IsWall()*/)
         {
             m_moveDir = Vector3.left;
             Move(m_moveDir, m_moveSpeed);
         }
-        if (Input.GetKey(KeyCode.RightArrow) && !IsDashing && !IsWall())
+        if (Input.GetKey(KeyCode.RightArrow) && !IsDashing/* && !IsWall()*/)
         {
             m_moveDir = Vector3.right;
             Move(m_moveDir, m_moveSpeed);
@@ -296,17 +298,17 @@ public class PlayerController : BaseController
         m_animator.SetBool("isDead", true);
     }
 
-    private bool IsWall()
-    {
-        Vector3 frontVec = transform.position + Vector3.right * 0.5f * m_moveDir.x + Vector3.up;
-        Debug.DrawRay(frontVec, m_moveDir, new Color(0, 1, 0));
-        RaycastHit2D rayHit = Physics2D.Raycast(frontVec, m_moveDir, 1, LayerMask.GetMask("Ground"));
+    //private bool IsWall()
+    //{
+    //    Vector3 frontVec = transform.position + Vector3.right * 0.5f * m_moveDir.x + Vector3.up;
+    //    Debug.DrawRay(frontVec, m_moveDir, new Color(0, 1, 0));
+    //    RaycastHit2D rayHit = Physics2D.Raycast(frontVec, m_moveDir, 1, LayerMask.GetMask("Ground"));
 
-        if (rayHit.collider != null)
-            return true;
-        else return false;
+    //    if (rayHit.collider != null)
+    //        return true;
+    //    else return false;
 
-    }
+    //}
 
     #region Trigger/Collision
     private void OnCollisionStay2D(Collision2D collision)
@@ -353,7 +355,7 @@ public class PlayerController : BaseController
             Destroy(other.gameObject);
         }
 
-        if (other.CompareTag(nameof(Define.TagName.MonsterAttack)) || other.CompareTag(nameof(Define.TagName.StrongAttack)))
+        if (other.CompareTag(nameof(Define.TagName.MonsterAttack)) || other.CompareTag(nameof(Define.TagName.MonsterStrongAttack)))
         {
             if (m_isDead) return;
 
@@ -406,7 +408,7 @@ public class PlayerController : BaseController
                 m_rigidbody.bodyType = RigidbodyType2D.Static;
             }
         }   
-
+        
         if (other.CompareTag(nameof(Define.TagName.SavePoint)))
         {
             GameScene.Instance.SaveRevivalPoint(other.transform.position);
@@ -416,10 +418,9 @@ public class PlayerController : BaseController
             {
                 hearUI.SetActive(false);
                 hearUI.SetActive(true);
-            }    
-
+            }
+            m_life = m_maxLlfe;
         }
-
     }
     
     #endregion

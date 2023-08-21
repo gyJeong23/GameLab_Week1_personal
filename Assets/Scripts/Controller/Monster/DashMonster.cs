@@ -13,7 +13,7 @@ public class DashMonster : BaseMonster
 
         m_thinkTime = 1f;
         m_defaultCoolTime = 1;
-        m_specialCoolTime = 3;
+        m_specialCoolTime = 5;
         m_hitCoolTime = 1.3f;
 
         m_detectRange = 15;
@@ -27,6 +27,12 @@ public class DashMonster : BaseMonster
     protected override IEnumerator AttackState(string _attack, float _coolTime)
     {
         if (m_isAttacking)
+        {
+            m_currentState = Define.MonsterState.Move;
+            yield break;
+        }
+
+        if (_attack.Equals("SpecialAttack") && m_canSpecialAttack == false)
         {
             m_currentState = Define.MonsterState.Move;
             yield break;
