@@ -9,7 +9,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1587750903349549892, guid: c5027624579d47445bbfb0db6ded068a, type: 3}
       propertyPath: m_Name
-      value: Desh Variant
+      value: Dash Variant
       objectReference: {fileID: 0}
     - target: {fileID: 2136162411903688030, guid: c5027624579d47445bbfb0db6ded068a, type: 3}
       propertyPath: m_text
@@ -61,7 +61,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3635740451030904092, guid: c5027624579d47445bbfb0db6ded068a, type: 3}
       propertyPath: m_itemType
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 4995590710299943219, guid: c5027624579d47445bbfb0db6ded068a, type: 3}
       propertyPath: m_Constraints

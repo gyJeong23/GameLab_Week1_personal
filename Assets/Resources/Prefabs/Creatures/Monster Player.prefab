@@ -268,7 +268,7 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 7017817764102272237, guid: 268ae7a8d28032c4eb481fff48fc0a06, type: 3}
   m_PrefabInstance: {fileID: 5005127790960913278}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &6809426642459115582
+--- !u!114 &8120324226034883602
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -277,18 +277,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 2599004858964303763}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d55eb77403752c644a4e36baf5ed55d0, type: 3}
+  m_Script: {fileID: 11500000, guid: 43629b28bc0fc9c4cb451176419b7fc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_currentState: 0
   m_mosterState: 0
-  m_life: 3
-  m_thinkTime: 0.8
-  m_defaultCoolTime: 0.8
-  m_specialCoolTime: 1
-  m_hitCoolTime: 1
-  m_detectRange: 20
-  m_defaultAttackRange: 6
-  m_specialAttackRange: 9
-  m_moveSpeed: 6
-  m_knockBackPower: 5
+  m_dropItem: {fileID: 0}

@@ -13,13 +13,7 @@ public class SavePoint : MonoBehaviour
         Debug.Log("s");
 
 
-        if (collision.gameObject.CompareTag(nameof(Define.TagName.Player)))
-        {
-            GameScene.Instance.SaveRevivalPoint(collision.transform.position);
-            Debug.Log("save");
-            
-            gameObject.SetActive(false);
-        }
+        
     }
 
     

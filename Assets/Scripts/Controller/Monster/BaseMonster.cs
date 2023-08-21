@@ -1,21 +1,14 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using Unity.Burst.CompilerServices;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UIElements;
 
-public class Slime : MonoBehaviour
+public abstract class BaseMonster : MonoBehaviour
 {
-    #region PublicVariables
-    #endregion
+    #region Protected Variables
 
-    #region PrivateVariables
-
-    [SerializeField] Define.MonsterState m_currentState;
-    [SerializeField] Define.MonsterState m_mosterState;
+    [SerializeField] protected Define.MonsterState m_currentState;
+    [SerializeField] protected Define.MonsterState m_mosterState;
 
     Define.MonsterState MonsterState
     {
@@ -67,60 +60,60 @@ public class Slime : MonoBehaviour
                     break;
                 case Define.MonsterState.Die:
                     {
-                        m_isDead = true;
-                        DropItem();
+                       
 
-                        m_animator.SetTrigger("onHit");
+                        m_animator.SetTrigger("onDie");
                         StartCoroutine(nameof(Die));
                         MonsterState = Define.MonsterState.Dead;
                     }
                     break;
                 case Define.MonsterState.Dead:
                     {
-                       
+
                     }
                     break;
             }
+
             #endregion
         }
     }
 
-    Transform m_targetTransform;
-    Animator m_animator;
-    Rigidbody2D m_rigidbody;
-    [SerializeField] GameObject m_dropItem;
+    protected Transform m_targetTransform;
+    protected Animator m_animator;
+    protected Rigidbody2D m_rigidbody;
 
-    Vector3 m_moveDir;
+    protected Vector3 m_moveDir;
 
-    [SerializeField] int m_life;
+    protected float m_thinkTimeCounter;
+    protected float m_targetDistance;
 
-    [SerializeField] float m_thinkTime;
-    [SerializeField] float m_defaultCoolTime;
-    [SerializeField] float m_specialCoolTime;
-    [SerializeField] float m_hitCoolTime;
+    protected bool m_isGround;
+    protected bool m_isAttacking;
+    protected bool m_canSpecialAttack = true;
+    protected bool m_isHit;
+    protected bool m_isDead;
 
-    float m_thinkTimeCounter;
-    float m_targetDistance;
-    [SerializeField] float m_detectRange;
-    [SerializeField] float m_defaultAttackRange;
-    [SerializeField] float m_specialAttackRange;
-    [SerializeField] float m_moveSpeed;
-    [SerializeField] float m_knockBackPower;
 
-    [SerializeField] bool m_isGround;
-    bool m_isAttacking;
-    bool m_canSpecialAttack = true;
-    bool m_isHit;
-    bool m_isDead;
+    [SerializeField] protected GameObject m_dropItem;
+
+    protected int m_life;
+
+    protected float m_thinkTime;
+    protected float m_defaultCoolTime;
+    protected float m_specialCoolTime;
+    protected float m_hitCoolTime;
+
+    protected float m_detectRange;
+    protected float m_defaultAttackRange;
+    protected float m_specialAttackRange;
+    protected float m_moveSpeed;
+    protected float m_knockBackPower;
 
     #endregion
 
-    #region PublicMethod
-    #endregion
+    #region Protected Methods
 
-    #region PrivateMethod
-
-    private void Start()
+    protected virtual void Start()
     {
         Util.SearchChild(transform, "Body").TryGetComponent<Animator>(out m_animator);
         TryGetComponent<Rigidbody2D>(out m_rigidbody);
@@ -128,10 +121,9 @@ public class Slime : MonoBehaviour
         m_currentState = Define.MonsterState.Idle;
         m_moveDir = Vector3.right;
         m_targetTransform = GameObject.FindWithTag("Player").transform;
-
     }
 
-    private void Update()
+    protected void Update()
     {
         if (m_isDead) return;
 
@@ -160,30 +152,29 @@ public class Slime : MonoBehaviour
                 break;
             case Define.MonsterState.Dead:
                 {
-                    Dead();
-                    MonsterState = Define.MonsterState.Dead;       
+                    MonsterState = Define.MonsterState.Dead;
                 }
                 break;
         }
         #endregion
     }
-    void FixedUpdate()
+    protected void FixedUpdate()
     {
         if (m_isGround == true)
             Turn();
     }
 
-    private void Turn()
+    protected void Turn()
     {
         Vector3 frontVec = transform.position + Vector3.right * m_moveDir.x;
         Debug.DrawRay(frontVec, Vector3.down, new Color(0, 1, 0));
         RaycastHit2D rayHit = Physics2D.Raycast(frontVec, Vector3.down, 1, LayerMask.GetMask("Ground"));
-        
+
         if (rayHit.collider == null)
             m_moveDir *= -1f;
     }
 
-    private void IdleState()
+    protected void IdleState()
     {
 
         if (m_targetDistance < m_detectRange)
@@ -192,9 +183,9 @@ public class Slime : MonoBehaviour
         Move(m_moveDir, m_moveSpeed);
     }
 
-    private void MoveState()
+    protected void MoveState()
     {
-        if (m_isAttacking == false) 
+        if (m_isAttacking == false)
         {
             if (m_targetDistance < m_specialAttackRange && m_canSpecialAttack)
                 m_currentState = Define.MonsterState.SpecialAttack;
@@ -211,7 +202,8 @@ public class Slime : MonoBehaviour
         Move(m_moveDir, m_moveSpeed * 1.5f);
     }
 
-    IEnumerator AttackState(string _attack, float _coolTime)
+
+    protected IEnumerator AttackState(string _attack, float _coolTime)
     {
         m_isAttacking = true;
 
@@ -232,36 +224,42 @@ public class Slime : MonoBehaviour
             yield return new WaitForSeconds(_coolTime);
             m_canSpecialAttack = true;
         }
-
     }
 
-    void Move(Vector3 _moveDir, float _moveSpeed)
+    protected void Move(Vector3 _moveDir, float _moveSpeed)
     {
         transform.position += _moveDir * _moveSpeed * Time.deltaTime;
         transform.localScale = new Vector3(_moveDir.x, 1, 1);
     }
 
-
-    IEnumerator Hit(float _cooltime)
+    protected IEnumerator Hit(float _cooltime)
     {
         m_isHit = true;
-        
+
         yield return new WaitForSeconds(_cooltime);
-        
+
         m_isHit = false;
     }
 
-    IEnumerator Die()
+    protected IEnumerator Die()
     {
-        yield return new WaitForSeconds(m_hitCoolTime / 2);
+        if (m_isDead) yield break;
 
-        m_animator.SetTrigger("onDie");
+        m_isDead = true;
+        DropItem();
 
-        yield return new WaitForSeconds(3f);
+        Collider2D monsterCollider;
+        TryGetComponent<Collider2D>(out monsterCollider);
+        monsterCollider.isTrigger = true;
+
+        if (m_isGround)
+            m_rigidbody.bodyType = RigidbodyType2D.Static;
+
+        yield return new WaitForSeconds(5f);
         Destroy(gameObject);
     }
 
-    private void DropItem()
+    protected void DropItem()
     {
         if (m_dropItem == null) return;
         if (m_isDead == false) return;
@@ -269,23 +267,13 @@ public class Slime : MonoBehaviour
         GameObject dropItem = GameObject.Instantiate<GameObject>(m_dropItem);
 
         dropItem.transform.position = transform.position;
-        dropItem.GetComponent<Rigidbody2D>().velocity = Vector3.up * 5f;
+        dropItem.GetComponent<Rigidbody2D>().velocity = Vector3.up * 7f;
 
         GameObject go = GameObject.Find("DropItems");
         dropItem.transform.SetParent(go.transform);
     }
 
-    void Dead()
-    {
-        Collider2D monsterCollider;
-        TryGetComponent<Collider2D>(out monsterCollider);
-        monsterCollider.isTrigger = true;
-
-        if (m_isGround) 
-            m_rigidbody.bodyType = RigidbodyType2D.Static;
-    }
-
-    void KnockBack(Vector3 _mosterVec)
+    protected void KnockBack(Vector3 _mosterVec)
     {
         Vector3 knockBackDir = new Vector3(_mosterVec.x, 0, 0).normalized;
         knockBackDir += Vector3.up * 2f;
@@ -294,20 +282,20 @@ public class Slime : MonoBehaviour
         Util.LimitVelocity2D(m_rigidbody, Vector3.one * m_knockBackPower);
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    protected void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Ground") && m_isGround == false)
             m_isGround = true;
 
     }
 
-    private void OnCollisionExit2D(Collision2D collision)
+    protected void OnCollisionExit2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Ground") && m_isGround == true)
             m_isGround = false;
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    protected void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("WeakAttack") || collision.CompareTag("StrongAttack"))
         {
@@ -323,13 +311,13 @@ public class Slime : MonoBehaviour
                 {
                     KnockBack(playerToMonsterVec);
                     MonsterState = Define.MonsterState.Die;
-                }   
+                }
                 else
                     MonsterState = Define.MonsterState.Hit;
             }
         }
     }
 
+
     #endregion
-    
 }
