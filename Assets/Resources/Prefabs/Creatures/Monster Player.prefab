@@ -344,6 +344,10 @@ PrefabInstance:
       value: 0.74244374
       objectReference: {fileID: 0}
     - target: {fileID: 5140558708114856123, guid: 268ae7a8d28032c4eb481fff48fc0a06, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5140558708114856123, guid: 268ae7a8d28032c4eb481fff48fc0a06, type: 3}
       propertyPath: m_Offset.x
       value: -0.02566135
       objectReference: {fileID: 0}
@@ -553,7 +557,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8282969991062639820, guid: 268ae7a8d28032c4eb481fff48fc0a06, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8282969991062639820, guid: 268ae7a8d28032c4eb481fff48fc0a06, type: 3}
       propertyPath: m_TagString

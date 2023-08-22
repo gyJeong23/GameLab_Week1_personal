@@ -643,6 +643,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_currentState: 0
   m_mosterState: 0
+  m_isGround: 0
   m_isAttacking: 0
   m_dropItem: {fileID: 3565914508327551362, guid: 0611e5c11fe45aa4db77e9d4f860835f, type: 3}
 --- !u!1 &5479087186557330870
@@ -686,7 +687,7 @@ BoxCollider2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5479087186557330870}
-  m_Enabled: 1
+  m_Enabled: 0
   m_Density: 1
   m_Material: {fileID: 0}
   m_IsTrigger: 1
